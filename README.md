@@ -27,6 +27,18 @@ ClawNova brings a redesigned interface to the OpenClaw Android client. Choose an
 
 ClawNova is a client: you need an existing OpenClaw Gateway and a configured model provider to use its AI features. Creating an agent requires a compatible Gateway and `operator.admin` access.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="assets/clawnova/screenshots/agents.png" width="240" alt="Agents home screen"><br><b>Agents</b></td>
+    <td align="center"><img src="assets/clawnova/screenshots/conversations.png" width="240" alt="An agent's conversations"><br><b>Conversations</b></td>
+    <td align="center"><img src="assets/clawnova/screenshots/create-agent.png" width="240" alt="Create an agent"><br><b>New agent</b></td>
+  </tr>
+</table>
+
+*Development previews rendered from the Android UI with sample data; these are not captures from a physical device and may differ from the 0.1 release.*
+
 ## Download
 
 [**Download ClawNova 0.1 for Android →**](https://github.com/RicchiutiDev/ClawNova/releases/tag/v0.1)
