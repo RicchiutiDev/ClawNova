@@ -1,0 +1,16 @@
+<resources>
+    <string name="clawnova_notifications_standard_title">Chat-Benachrichtigungen bleiben verfügbar.</string>
+    <string name="clawnova_notifications_standard_body">Diese Ausgabe kann Benachrichtigungen anderer Apps weder lesen noch weiterleiten. SMS, Anruflisten und die Steuerung über Bedienungshilfen sind ebenfalls ausgeschlossen. Chat, Sprache und Benachrichtigungen für deine Unterhaltungen bleiben verfügbar.</string>
+    <string name="clawnova_new_agent">Neuer Agent</string>
+    <string name="clawnova_agent_name">Name des Agenten</string>
+    <string name="clawnova_agent_create_hint">Wähle einen Namen. Dein Gateway erstellt den Agenten und seinen Arbeitsbereich.</string>
+    <string name="clawnova_no_agents">Noch keine Agenten</string>
+    <string name="clawnova_no_agents_body">Erstelle einen Agenten, um ein Gespräch zu beginnen.</string>
+    <string name="clawnova_no_agent_chats">Noch keine Chats</string>
+    <string name="clawnova_no_agent_chats_body">Starte einen neuen Chat mit diesem Agenten.</string>
+    <string name="clawnova_agent_chats_error">Die Chats dieses Agenten konnten nicht geladen werden. Versuche es erneut.</string>
+    <string name="clawnova_create_agent_error">Der Agent konnte nicht erstellt werden. Versuche es erneut.</string>
+    <string name="clawnova_connect_create_agent">Verbinde dein Gateway, um einen Agenten zu erstellen.</string>
+    <string name="clawnova_agent_chat_create_error">Ein neuer Chat konnte nicht gestartet werden. Versuche es erneut.</string>
+    <string name="clawnova_no_matching_agents">Keine passenden Agenten</string>
+</resources>

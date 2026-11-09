@@ -1,0 +1,16 @@
+<resources>
+    <string name="clawnova_notifications_standard_title">チャットの通知は引き続き利用できます。</string>
+    <string name="clawnova_notifications_standard_body">このエディションでは、他のアプリの通知の読み取りや転送はできません。SMS、通話履歴、ユーザー補助による操作も含まれません。チャット、音声、会話の通知は引き続き利用できます。</string>
+    <string name="clawnova_new_agent">新しいエージェント</string>
+    <string name="clawnova_agent_name">エージェント名</string>
+    <string name="clawnova_agent_create_hint">名前を選んでください。Gateway がエージェントとそのワークスペースを作成します。</string>
+    <string name="clawnova_no_agents">まだエージェントがありません</string>
+    <string name="clawnova_no_agents_body">会話を始めるにはエージェントを作成してください。</string>
+    <string name="clawnova_no_agent_chats">まだチャットがありません</string>
+    <string name="clawnova_no_agent_chats_body">このエージェントと新しいチャットを開始してください。</string>
+    <string name="clawnova_agent_chats_error">このエージェントのチャットを読み込めませんでした。もう一度お試しください。</string>
+    <string name="clawnova_create_agent_error">エージェントを作成できませんでした。もう一度お試しください。</string>
+    <string name="clawnova_connect_create_agent">エージェントを作成するには Gateway に接続してください。</string>
+    <string name="clawnova_agent_chat_create_error">新しいチャットを開始できませんでした。もう一度お試しください。</string>
+    <string name="clawnova_no_matching_agents">一致するエージェントはありません</string>
+</resources>

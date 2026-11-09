@@ -1,0 +1,16 @@
+<resources>
+    <string name="clawnova_notifications_standard_title">Уведомления чата остаются доступны.</string>
+    <string name="clawnova_notifications_standard_body">Эта версия не может читать или пересылать уведомления других приложений. SMS, журнал вызовов и управление через специальные возможности также исключены. Чат, голос и уведомления о беседах остаются доступны.</string>
+    <string name="clawnova_new_agent">Новый агент</string>
+    <string name="clawnova_agent_name">Имя агента</string>
+    <string name="clawnova_agent_create_hint">Выберите имя. Ваш Gateway создаст агента и его рабочую область.</string>
+    <string name="clawnova_no_agents">Агентов пока нет</string>
+    <string name="clawnova_no_agents_body">Создайте агента, чтобы начать разговор.</string>
+    <string name="clawnova_no_agent_chats">Чатов пока нет</string>
+    <string name="clawnova_no_agent_chats_body">Начните новый чат с этим агентом.</string>
+    <string name="clawnova_agent_chats_error">Не удалось загрузить чаты этого агента. Повторите попытку.</string>
+    <string name="clawnova_create_agent_error">Не удалось создать агента. Повторите попытку.</string>
+    <string name="clawnova_connect_create_agent">Подключите Gateway, чтобы создать агента.</string>
+    <string name="clawnova_agent_chat_create_error">Не удалось начать новый чат. Повторите попытку.</string>
+    <string name="clawnova_no_matching_agents">Подходящих агентов нет</string>
+</resources>

@@ -1,0 +1,16 @@
+<resources>
+    <string name="clawnova_notifications_standard_title">Les notifications du chat restent disponibles.</string>
+    <string name="clawnova_notifications_standard_body">Cette édition ne peut pas lire ni transférer les notifications des autres applications. Les SMS, le journal des appels et le contrôle par accessibilité sont également exclus. Le chat, la voix et les notifications de vos conversations restent disponibles.</string>
+    <string name="clawnova_new_agent">Nouvel agent</string>
+    <string name="clawnova_agent_name">Nom de l’agent</string>
+    <string name="clawnova_agent_create_hint">Choisissez un nom. Votre Gateway créera l’agent et son espace de travail.</string>
+    <string name="clawnova_no_agents">Aucun agent pour le moment</string>
+    <string name="clawnova_no_agents_body">Créez un agent pour démarrer une conversation.</string>
+    <string name="clawnova_no_agent_chats">Aucun chat pour le moment</string>
+    <string name="clawnova_no_agent_chats_body">Démarrez un nouveau chat avec cet agent.</string>
+    <string name="clawnova_agent_chats_error">Impossible de charger les chats de cet agent. Réessayez.</string>
+    <string name="clawnova_create_agent_error">Impossible de créer l’agent. Réessayez.</string>
+    <string name="clawnova_connect_create_agent">Connectez votre Gateway pour créer un agent.</string>
+    <string name="clawnova_agent_chat_create_error">Impossible de démarrer un nouveau chat. Réessayez.</string>
+    <string name="clawnova_no_matching_agents">Aucun agent correspondant</string>
+</resources>

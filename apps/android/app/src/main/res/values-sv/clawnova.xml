@@ -1,0 +1,16 @@
+<resources>
+    <string name="clawnova_notifications_standard_title">Chattaviseringar är fortfarande tillgängliga.</string>
+    <string name="clawnova_notifications_standard_body">Den här utgåvan kan inte läsa eller vidarebefordra aviseringar från andra appar. SMS, samtalshistorik och styrning via tillgänglighet ingår inte heller. Chatt, röst och aviseringar för dina samtal är fortfarande tillgängliga.</string>
+    <string name="clawnova_new_agent">Ny agent</string>
+    <string name="clawnova_agent_name">Agentens namn</string>
+    <string name="clawnova_agent_create_hint">Välj ett namn. Din Gateway skapar agenten och dess arbetsyta.</string>
+    <string name="clawnova_no_agents">Inga agenter än</string>
+    <string name="clawnova_no_agents_body">Skapa en agent för att starta en konversation.</string>
+    <string name="clawnova_no_agent_chats">Inga chattar än</string>
+    <string name="clawnova_no_agent_chats_body">Starta en ny chatt med den här agenten.</string>
+    <string name="clawnova_agent_chats_error">Det gick inte att läsa in den här agentens chattar. Försök igen.</string>
+    <string name="clawnova_create_agent_error">Det gick inte att skapa agenten. Försök igen.</string>
+    <string name="clawnova_connect_create_agent">Anslut din Gateway för att skapa en agent.</string>
+    <string name="clawnova_agent_chat_create_error">Det gick inte att starta en ny chatt. Försök igen.</string>
+    <string name="clawnova_no_matching_agents">Inga matchande agenter</string>
+</resources>

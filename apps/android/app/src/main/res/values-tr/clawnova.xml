@@ -1,0 +1,16 @@
+<resources>
+    <string name="clawnova_notifications_standard_title">Sohbet bildirimleri kullanılabilir.</string>
+    <string name="clawnova_notifications_standard_body">Bu sürüm diğer uygulamaların bildirimlerini okuyamaz veya iletemez. SMS, arama geçmişi ve erişilebilirlik üzerinden kontrol de dahil değildir. Sohbet, ses ve konuşma bildirimleri kullanılabilir.</string>
+    <string name="clawnova_new_agent">Yeni ajan</string>
+    <string name="clawnova_agent_name">Ajan adı</string>
+    <string name="clawnova_agent_create_hint">Bir ad seçin. Gateway ajanı ve çalışma alanını oluşturacak.</string>
+    <string name="clawnova_no_agents">Henüz ajan yok</string>
+    <string name="clawnova_no_agents_body">Sohbet başlatmak için bir ajan oluşturun.</string>
+    <string name="clawnova_no_agent_chats">Henüz sohbet yok</string>
+    <string name="clawnova_no_agent_chats_body">Bu ajanla yeni bir sohbet başlatın.</string>
+    <string name="clawnova_agent_chats_error">Bu ajanın sohbetleri yüklenemedi. Tekrar deneyin.</string>
+    <string name="clawnova_create_agent_error">Ajan oluşturulamadı. Tekrar deneyin.</string>
+    <string name="clawnova_connect_create_agent">Ajan oluşturmak için Gateway bağlantısını kurun.</string>
+    <string name="clawnova_agent_chat_create_error">Yeni sohbet başlatılamadı. Tekrar deneyin.</string>
+    <string name="clawnova_no_matching_agents">Eşleşen ajan yok</string>
+</resources>

@@ -1,0 +1,16 @@
+<resources>
+    <string name="clawnova_notifications_standard_title">Powiadomienia czatu pozostają dostępne.</string>
+    <string name="clawnova_notifications_standard_body">Ta edycja nie może odczytywać ani przekazywać powiadomień z innych aplikacji. Nie obejmuje też SMS-ów, historii połączeń ani sterowania przez ułatwienia dostępu. Czat, głos i powiadomienia rozmów pozostają dostępne.</string>
+    <string name="clawnova_new_agent">Nowy agent</string>
+    <string name="clawnova_agent_name">Nazwa agenta</string>
+    <string name="clawnova_agent_create_hint">Wybierz nazwę. Twój Gateway utworzy agenta i jego obszar roboczy.</string>
+    <string name="clawnova_no_agents">Nie ma jeszcze agentów</string>
+    <string name="clawnova_no_agents_body">Utwórz agenta, aby rozpocząć rozmowę.</string>
+    <string name="clawnova_no_agent_chats">Nie ma jeszcze czatów</string>
+    <string name="clawnova_no_agent_chats_body">Rozpocznij nowy czat z tym agentem.</string>
+    <string name="clawnova_agent_chats_error">Nie udało się wczytać czatów tego agenta. Spróbuj ponownie.</string>
+    <string name="clawnova_create_agent_error">Nie udało się utworzyć agenta. Spróbuj ponownie.</string>
+    <string name="clawnova_connect_create_agent">Połącz swój Gateway, aby utworzyć agenta.</string>
+    <string name="clawnova_agent_chat_create_error">Nie udało się rozpocząć nowego czatu. Spróbuj ponownie.</string>
+    <string name="clawnova_no_matching_agents">Brak pasujących agentów</string>
+</resources>

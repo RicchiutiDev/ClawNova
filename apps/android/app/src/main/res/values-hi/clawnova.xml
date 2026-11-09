@@ -1,0 +1,16 @@
+<resources>
+    <string name="clawnova_notifications_standard_title">चैट की सूचनाएँ उपलब्ध रहेंगी।</string>
+    <string name="clawnova_notifications_standard_body">यह संस्करण दूसरे ऐप की सूचनाएँ पढ़ या आगे नहीं भेज सकता। SMS, कॉल इतिहास और सुलभता के ज़रिए नियंत्रण भी शामिल नहीं हैं। चैट, आवाज़ और आपकी बातचीत की सूचनाएँ उपलब्ध रहेंगी।</string>
+    <string name="clawnova_new_agent">नया एजेंट</string>
+    <string name="clawnova_agent_name">एजेंट का नाम</string>
+    <string name="clawnova_agent_create_hint">कोई नाम चुनें। आपका Gateway एजेंट और उसका कार्यक्षेत्र बनाएगा।</string>
+    <string name="clawnova_no_agents">अभी कोई एजेंट नहीं है</string>
+    <string name="clawnova_no_agents_body">बातचीत शुरू करने के लिए एक एजेंट बनाएँ।</string>
+    <string name="clawnova_no_agent_chats">अभी कोई चैट नहीं है</string>
+    <string name="clawnova_no_agent_chats_body">इस एजेंट के साथ नई चैट शुरू करें।</string>
+    <string name="clawnova_agent_chats_error">इस एजेंट की चैट लोड नहीं हो सकीं। फिर से कोशिश करें।</string>
+    <string name="clawnova_create_agent_error">एजेंट नहीं बनाया जा सका। फिर से कोशिश करें।</string>
+    <string name="clawnova_connect_create_agent">एजेंट बनाने के लिए अपना Gateway कनेक्ट करें।</string>
+    <string name="clawnova_agent_chat_create_error">नई चैट शुरू नहीं हो सकी। फिर से कोशिश करें।</string>
+    <string name="clawnova_no_matching_agents">कोई मेल खाने वाला एजेंट नहीं</string>
+</resources>

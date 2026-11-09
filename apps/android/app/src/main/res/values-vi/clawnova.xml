@@ -1,0 +1,16 @@
+<resources>
+    <string name="clawnova_notifications_standard_title">Thông báo trò chuyện vẫn hoạt động.</string>
+    <string name="clawnova_notifications_standard_body">Phiên bản này không thể đọc hoặc chuyển tiếp thông báo từ ứng dụng khác. SMS, lịch sử cuộc gọi và điều khiển qua trợ năng cũng không được bao gồm. Trò chuyện, giọng nói và thông báo cho cuộc trò chuyện vẫn hoạt động.</string>
+    <string name="clawnova_new_agent">Tác nhân mới</string>
+    <string name="clawnova_agent_name">Tên tác nhân</string>
+    <string name="clawnova_agent_create_hint">Chọn tên. Gateway sẽ tạo tác nhân và không gian làm việc của tác nhân đó.</string>
+    <string name="clawnova_no_agents">Chưa có tác nhân nào</string>
+    <string name="clawnova_no_agents_body">Tạo tác nhân để bắt đầu cuộc trò chuyện.</string>
+    <string name="clawnova_no_agent_chats">Chưa có cuộc trò chuyện nào</string>
+    <string name="clawnova_no_agent_chats_body">Bắt đầu cuộc trò chuyện mới với tác nhân này.</string>
+    <string name="clawnova_agent_chats_error">Không thể tải các cuộc trò chuyện của tác nhân này. Hãy thử lại.</string>
+    <string name="clawnova_create_agent_error">Không thể tạo tác nhân. Hãy thử lại.</string>
+    <string name="clawnova_connect_create_agent">Kết nối Gateway của bạn để tạo tác nhân.</string>
+    <string name="clawnova_agent_chat_create_error">Không thể bắt đầu cuộc trò chuyện mới. Hãy thử lại.</string>
+    <string name="clawnova_no_matching_agents">Không có tác nhân phù hợp</string>
+</resources>

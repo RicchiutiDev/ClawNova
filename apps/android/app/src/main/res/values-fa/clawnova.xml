@@ -1,0 +1,16 @@
+<resources>
+    <string name="clawnova_notifications_standard_title">اعلان‌های گفتگو همچنان در دسترس هستند.</string>
+    <string name="clawnova_notifications_standard_body">این نسخه نمی‌تواند اعلان‌های برنامه‌های دیگر را بخواند یا ارسال کند. پیامک، سابقه تماس و کنترل از طریق دسترس‌پذیری نیز در این نسخه وجود ندارند. گفتگو، صدا و اعلان‌های گفتگوها همچنان در دسترس هستند.</string>
+    <string name="clawnova_new_agent">عامل جدید</string>
+    <string name="clawnova_agent_name">نام عامل</string>
+    <string name="clawnova_agent_create_hint">نامی انتخاب کنید. Gateway عامل و فضای کاری آن را ایجاد می‌کند.</string>
+    <string name="clawnova_no_agents">هنوز عاملی وجود ندارد</string>
+    <string name="clawnova_no_agents_body">برای شروع گفتگو یک عامل ایجاد کنید.</string>
+    <string name="clawnova_no_agent_chats">هنوز گفتگویی وجود ندارد</string>
+    <string name="clawnova_no_agent_chats_body">گفتگوی جدیدی با این عامل شروع کنید.</string>
+    <string name="clawnova_agent_chats_error">گفتگوهای این عامل بارگیری نشدند. دوباره تلاش کنید.</string>
+    <string name="clawnova_create_agent_error">عامل ایجاد نشد. دوباره تلاش کنید.</string>
+    <string name="clawnova_connect_create_agent">برای ایجاد عامل، Gateway خود را متصل کنید.</string>
+    <string name="clawnova_agent_chat_create_error">گفتگوی جدید شروع نشد. دوباره تلاش کنید.</string>
+    <string name="clawnova_no_matching_agents">عامل منطبقی پیدا نشد</string>
+</resources>

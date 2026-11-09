@@ -1,0 +1,16 @@
+<resources>
+    <string name="clawnova_notifications_standard_title">تظل إشعارات الدردشة متاحة.</string>
+    <string name="clawnova_notifications_standard_body">لا يمكن لهذا الإصدار قراءة إشعارات التطبيقات الأخرى أو إعادة توجيهها. كما يستثني الرسائل النصية وسجل المكالمات والتحكم عبر تسهيل الاستخدام. تظل الدردشة والصوت وإشعارات المحادثات متاحة.</string>
+    <string name="clawnova_new_agent">وكيل جديد</string>
+    <string name="clawnova_agent_name">اسم الوكيل</string>
+    <string name="clawnova_agent_create_hint">اختر اسمًا. سيُنشئ Gateway الوكيل ومساحة عمله.</string>
+    <string name="clawnova_no_agents">لا يوجد وكلاء بعد</string>
+    <string name="clawnova_no_agents_body">أنشئ وكيلًا لبدء محادثة.</string>
+    <string name="clawnova_no_agent_chats">لا توجد محادثات بعد</string>
+    <string name="clawnova_no_agent_chats_body">ابدأ محادثة جديدة مع هذا الوكيل.</string>
+    <string name="clawnova_agent_chats_error">تعذّر تحميل محادثات هذا الوكيل. حاول مرة أخرى.</string>
+    <string name="clawnova_create_agent_error">تعذّر إنشاء الوكيل. حاول مرة أخرى.</string>
+    <string name="clawnova_connect_create_agent">اتصل بـ Gateway لإنشاء وكيل.</string>
+    <string name="clawnova_agent_chat_create_error">تعذّر بدء محادثة جديدة. حاول مرة أخرى.</string>
+    <string name="clawnova_no_matching_agents">لا يوجد وكلاء مطابقون</string>
+</resources>

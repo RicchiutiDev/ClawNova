@@ -1,0 +1,16 @@
+<resources>
+    <string name="clawnova_notifications_standard_title">聊天通知仍然可用。</string>
+    <string name="clawnova_notifications_standard_body">此版本无法读取或转发其他应用的通知，也不包含短信、通话记录和无障碍控制功能。聊天、语音和会话通知仍然可用。</string>
+    <string name="clawnova_new_agent">新建智能体</string>
+    <string name="clawnova_agent_name">智能体名称</string>
+    <string name="clawnova_agent_create_hint">选择一个名称。Gateway 将创建智能体及其工作区。</string>
+    <string name="clawnova_no_agents">尚无智能体</string>
+    <string name="clawnova_no_agents_body">创建智能体以开始对话。</string>
+    <string name="clawnova_no_agent_chats">尚无聊天</string>
+    <string name="clawnova_no_agent_chats_body">与此智能体开始新聊天。</string>
+    <string name="clawnova_agent_chats_error">无法加载此智能体的聊天。请重试。</string>
+    <string name="clawnova_create_agent_error">无法创建智能体。请重试。</string>
+    <string name="clawnova_connect_create_agent">连接 Gateway 以创建智能体。</string>
+    <string name="clawnova_agent_chat_create_error">无法开始新聊天。请重试。</string>
+    <string name="clawnova_no_matching_agents">没有匹配的智能体</string>
+</resources>

@@ -1,0 +1,16 @@
+<resources>
+    <string name="clawnova_notifications_standard_title">Notifikasi chat tetap tersedia.</string>
+    <string name="clawnova_notifications_standard_body">Edisi ini tidak dapat membaca atau meneruskan notifikasi dari aplikasi lain. SMS, riwayat panggilan, dan kontrol melalui aksesibilitas juga tidak disertakan. Chat, suara, dan notifikasi percakapan tetap tersedia.</string>
+    <string name="clawnova_new_agent">Agen baru</string>
+    <string name="clawnova_agent_name">Nama agen</string>
+    <string name="clawnova_agent_create_hint">Pilih nama. Gateway Anda akan membuat agen dan ruang kerjanya.</string>
+    <string name="clawnova_no_agents">Belum ada agen</string>
+    <string name="clawnova_no_agents_body">Buat agen untuk memulai percakapan.</string>
+    <string name="clawnova_no_agent_chats">Belum ada chat</string>
+    <string name="clawnova_no_agent_chats_body">Mulai chat baru dengan agen ini.</string>
+    <string name="clawnova_agent_chats_error">Chat agen ini tidak dapat dimuat. Coba lagi.</string>
+    <string name="clawnova_create_agent_error">Agen tidak dapat dibuat. Coba lagi.</string>
+    <string name="clawnova_connect_create_agent">Hubungkan Gateway Anda untuk membuat agen.</string>
+    <string name="clawnova_agent_chat_create_error">Chat baru tidak dapat dimulai. Coba lagi.</string>
+    <string name="clawnova_no_matching_agents">Tidak ada agen yang cocok</string>
+</resources>

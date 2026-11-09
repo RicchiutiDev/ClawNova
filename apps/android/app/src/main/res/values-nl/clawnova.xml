@@ -1,0 +1,16 @@
+<resources>
+    <string name="clawnova_notifications_standard_title">Chatmeldingen blijven beschikbaar.</string>
+    <string name="clawnova_notifications_standard_body">Deze editie kan meldingen van andere apps niet lezen of doorsturen. Ook sms, oproepgeschiedenis en bediening via toegankelijkheid zijn uitgesloten. Chat, spraak en meldingen voor je gesprekken blijven beschikbaar.</string>
+    <string name="clawnova_new_agent">Nieuwe agent</string>
+    <string name="clawnova_agent_name">Naam van agent</string>
+    <string name="clawnova_agent_create_hint">Kies een naam. Je Gateway maakt de agent en de bijbehorende werkruimte aan.</string>
+    <string name="clawnova_no_agents">Nog geen agents</string>
+    <string name="clawnova_no_agents_body">Maak een agent om een gesprek te beginnen.</string>
+    <string name="clawnova_no_agent_chats">Nog geen chats</string>
+    <string name="clawnova_no_agent_chats_body">Start een nieuwe chat met deze agent.</string>
+    <string name="clawnova_agent_chats_error">De chats van deze agent konden niet worden geladen. Probeer het opnieuw.</string>
+    <string name="clawnova_create_agent_error">De agent kon niet worden aangemaakt. Probeer het opnieuw.</string>
+    <string name="clawnova_connect_create_agent">Verbind je Gateway om een agent te maken.</string>
+    <string name="clawnova_agent_chat_create_error">Er kon geen nieuwe chat worden gestart. Probeer het opnieuw.</string>
+    <string name="clawnova_no_matching_agents">Geen overeenkomende agents</string>
+</resources>

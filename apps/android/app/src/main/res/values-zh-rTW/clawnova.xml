@@ -1,0 +1,16 @@
+<resources>
+    <string name="clawnova_notifications_standard_title">聊天通知仍然可用。</string>
+    <string name="clawnova_notifications_standard_body">此版本無法讀取或轉寄其他應用程式的通知，也不包含簡訊、通話記錄和無障礙控制功能。聊天、語音和對話通知仍然可用。</string>
+    <string name="clawnova_new_agent">新增代理程式</string>
+    <string name="clawnova_agent_name">代理程式名稱</string>
+    <string name="clawnova_agent_create_hint">選擇名稱。Gateway 將建立代理程式及其工作區。</string>
+    <string name="clawnova_no_agents">尚無代理程式</string>
+    <string name="clawnova_no_agents_body">建立代理程式以開始對話。</string>
+    <string name="clawnova_no_agent_chats">尚無聊天</string>
+    <string name="clawnova_no_agent_chats_body">與此代理程式開始新聊天。</string>
+    <string name="clawnova_agent_chats_error">無法載入此代理程式的聊天。請再試一次。</string>
+    <string name="clawnova_create_agent_error">無法建立代理程式。請再試一次。</string>
+    <string name="clawnova_connect_create_agent">連線至你的 Gateway 以建立代理程式。</string>
+    <string name="clawnova_agent_chat_create_error">無法開始新聊天。請再試一次。</string>
+    <string name="clawnova_no_matching_agents">沒有符合條件的代理程式</string>
+</resources>

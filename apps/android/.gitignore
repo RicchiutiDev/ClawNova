@@ -1,0 +1,13 @@
+.gradle/
+**/build/
+local.properties
+.idea/
+**/*.iml
+
+# Local signing material and manually exported Android packages
+**/*.jks
+**/*.keystore
+**/*.p12
+**/*.pfx
+**/*.apk
+**/*.aab

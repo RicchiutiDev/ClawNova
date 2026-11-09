@@ -1,0 +1,16 @@
+<resources>
+    <string name="clawnova_notifications_standard_title">ยังใช้การแจ้งเตือนแชทได้</string>
+    <string name="clawnova_notifications_standard_body">รุ่นนี้ไม่สามารถอ่านหรือส่งต่อการแจ้งเตือนจากแอปอื่นได้ รวมถึงไม่รองรับ SMS ประวัติการโทร และการควบคุมผ่านการช่วยเหลือพิเศษ แต่ยังใช้แชท เสียง และการแจ้งเตือนการสนทนาได้</string>
+    <string name="clawnova_new_agent">เอเจนต์ใหม่</string>
+    <string name="clawnova_agent_name">ชื่อเอเจนต์</string>
+    <string name="clawnova_agent_create_hint">เลือกชื่อ Gateway ของคุณจะสร้างเอเจนต์และพื้นที่ทำงานให้</string>
+    <string name="clawnova_no_agents">ยังไม่มีเอเจนต์</string>
+    <string name="clawnova_no_agents_body">สร้างเอเจนต์เพื่อเริ่มการสนทนา</string>
+    <string name="clawnova_no_agent_chats">ยังไม่มีแชท</string>
+    <string name="clawnova_no_agent_chats_body">เริ่มแชทใหม่กับเอเจนต์นี้</string>
+    <string name="clawnova_agent_chats_error">โหลดแชทของเอเจนต์นี้ไม่ได้ โปรดลองอีกครั้ง</string>
+    <string name="clawnova_create_agent_error">สร้างเอเจนต์ไม่ได้ โปรดลองอีกครั้ง</string>
+    <string name="clawnova_connect_create_agent">เชื่อมต่อ Gateway ของคุณเพื่อสร้างเอเจนต์</string>
+    <string name="clawnova_agent_chat_create_error">เริ่มแชทใหม่ไม่ได้ โปรดลองอีกครั้ง</string>
+    <string name="clawnova_no_matching_agents">ไม่พบเอเจนต์ที่ตรงกัน</string>
+</resources>
