@@ -1,7 +1,6 @@
 package ai.openclaw.app.ui
 
 import ai.openclaw.app.AppearanceThemeFamily
-import ai.openclaw.app.GatewayAgentSummary
 import ai.openclaw.app.chat.ChatSessionEntry
 import ai.openclaw.app.ui.design.clawColorsForTheme
 import org.junit.Assert.assertEquals
@@ -41,7 +40,7 @@ class SidebarShellLogicTest {
         SidebarDestination.Threads,
         SidebarDestination.Home,
         SidebarDestination.Skills,
-        SidebarDestination.Work,
+        SidebarDestination.LastChat,
         SidebarDestination.Agents,
       ),
       destinations.take(5),
@@ -90,7 +89,7 @@ class SidebarShellLogicTest {
       listOf("work", "home", "threads"),
       updateSidebarDestinationVisibility(
         visibleIds = listOf("threads", "home"),
-        destination = SidebarDestination.Work,
+        destination = SidebarDestination.LastChat,
         visible = true,
       ),
     )
@@ -102,42 +101,6 @@ class SidebarShellLogicTest {
         visible = false,
       ),
     )
-  }
-
-  @Test
-  fun agentPickerExcludesSystemAgentsDeduplicatesAndKeepsTheSelection() {
-    val state =
-      agentPickerState(
-        agents =
-          listOf(
-            agent("main"),
-            agent("system", kind = "system"),
-            agent("ops"),
-            agent("main"),
-          ),
-        selectedAgentId = "ops",
-      )
-
-    assertEquals(listOf("main", "ops"), state.agents.map(GatewayAgentSummary::id))
-    assertEquals("ops", state.selected?.id)
-    assertEquals("ops", state.selectedAgentId)
-  }
-
-  @Test
-  fun agentPickerFallsBackToTheFirstSelectableAgent() {
-    val state = agentPickerState(listOf(agent("main"), agent("ops")), selectedAgentId = "missing")
-
-    assertEquals("main", state.selected?.id)
-    assertEquals("main", state.selectedAgentId)
-  }
-
-  @Test
-  fun emptyAgentPickerHasNoSyntheticSelection() {
-    val state = agentPickerState(listOf(agent("system", kind = "system")), selectedAgentId = "main")
-
-    assertNull(state.selected)
-    assertNull(state.selectedAgentId)
-    assertEquals(emptyList<String>(), state.agents.map(GatewayAgentSummary::id))
   }
 
   @Test
@@ -356,17 +319,6 @@ class SidebarShellLogicTest {
     assertNull(sidebarSessionActivity("queued", null, false, false))
     assertEquals(SidebarSessionActivity.Unread, sidebarSessionActivity("queued", null, false, true))
   }
-
-  private fun agent(
-    id: String,
-    kind: String? = null,
-  ): GatewayAgentSummary =
-    GatewayAgentSummary(
-      id = id,
-      name = id,
-      emoji = null,
-      kind = kind,
-    )
 
   private fun session(
     key: String,

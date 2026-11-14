@@ -24,6 +24,8 @@ On Windows, use `gradlew.bat :app:assembleStandardDebug` instead. Configure the 
 
 This is a debug build, signed with the local Android debug key. ClawNova Standard 0.1 uses the release application ID `dev.ricchiutidev.clawnova`; the debug build adds `.debug`. It installs separately from older ClawNova debug builds and the official OpenClaw app. Local settings and credentials do not migrate automatically. The existing Wear companion is not compatible with this release because its application ID and signing identity differ.
 
+To update an original Standard APK through v6 in place, build `:app:assembleStandardLegacyDebug` with the original debug keystore. This variant uses `ai.openclaw.app.debug` and writes its APK to `apps/android/app/build/outputs/apk/standardLegacy/debug/`.
+
 Release builds require a private signing key. Back up the key and its password securely: future updates must use the same signing identity. See the [Android guide](apps/android/README.md) for the underlying project and other build variants.
 
 ## Verification and limitations

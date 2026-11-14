@@ -325,7 +325,6 @@ class SidebarCatalogGroupingTest {
         ClawDesignTheme {
           OpenClawSidebar(
             viewModel = viewModel,
-            agents = emptyList(),
             selectedAgentId = "main",
             sessions = emptyList(),
             activeSessionKey = "main",
@@ -335,8 +334,6 @@ class SidebarCatalogGroupingTest {
             showCloseButton = false,
             onClose = {},
             onDragActiveChange = { dragStates += it },
-            onNewSession = {},
-            onSelectAgent = {},
             onSelectSession = {},
             onSelectCatalogSession = {},
             onCreateCatalogSession = {},
@@ -344,7 +341,7 @@ class SidebarCatalogGroupingTest {
           )
         }
       }
-      composeRule.onNodeWithText("Overview").assertDoesNotExist()
+      composeRule.onNodeWithText("Last chat").assertDoesNotExist()
       composeRule.onNodeWithText("Home").assertIsDisplayed()
       composeRule.onNodeWithText("Agents").assertIsDisplayed().performTouchInput(dragOnePageDown)
 
@@ -371,7 +368,7 @@ class SidebarCatalogGroupingTest {
       composeRule.onNodeWithText("Edit pinned items").performScrollTo().performClick()
       composeRule.onNodeWithText("EDIT PINNED ITEMS").performScrollTo().assertIsDisplayed()
       composeRule
-        .onNodeWithText("Overview")
+        .onNodeWithText("Last chat")
         .performScrollTo()
         .assertIsDisplayed()
         .performTouchInput(dragOnePageDown)
@@ -421,7 +418,6 @@ class SidebarCatalogGroupingTest {
         ClawDesignTheme {
           OpenClawSidebar(
             viewModel = viewModel,
-            agents = emptyList(),
             selectedAgentId = "main",
             sessions = sessions,
             activeSessionKey = pinnedKey,
@@ -431,8 +427,6 @@ class SidebarCatalogGroupingTest {
             showCloseButton = false,
             onClose = {},
             onDragActiveChange = {},
-            onNewSession = {},
-            onSelectAgent = {},
             onSelectSession = { selectedSessionKey = it.key },
             onSelectCatalogSession = {},
             onCreateCatalogSession = {},
@@ -509,7 +503,6 @@ class SidebarCatalogGroupingTest {
         ClawDesignTheme {
           OpenClawSidebar(
             viewModel = viewModel,
-            agents = emptyList(),
             selectedAgentId = "main",
             sessions = liveSessions.value,
             activeSessionKey = requireNotNull(adopted.sessionKey),
@@ -519,8 +512,6 @@ class SidebarCatalogGroupingTest {
             showCloseButton = false,
             onClose = {},
             onDragActiveChange = {},
-            onNewSession = {},
-            onSelectAgent = {},
             onSelectSession = {},
             onSelectCatalogSession = {},
             onCreateCatalogSession = {},

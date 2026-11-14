@@ -232,6 +232,29 @@ internal object AndroidScreenshotFixture {
           }.toString()
         }
 
+        "sessions.search" -> {
+          val params = Json.parseToJsonElement(requireNotNull(paramsJson)).jsonObject
+          val query = params.getValue("query").jsonPrimitive.content
+          val snippet = "Check the release checklist and summarize what is ready."
+          buildJsonObject {
+            putJsonArray("results") {
+              if (snippet.contains(query, ignoreCase = true)) {
+                add(buildJsonObject {
+                  put("sessionKey", mainSessionKey)
+                  put("snippet", snippet)
+                })
+              }
+            }
+            putJsonArray("sessions") {
+              add(buildJsonObject {
+                put("key", mainSessionKey)
+                put("agentId", "main")
+                put("displayName", primarySessionTitle)
+              })
+            }
+          }.toString()
+        }
+
         "sessions.list" -> {
           if (branchesEnabled) branchSessionList(paramsJson, activeLeaf.get()) else sessionList(paramsJson, fixtureNowMs)
         }

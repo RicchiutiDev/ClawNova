@@ -5799,6 +5799,24 @@ class NodeRuntime internal constructor(
     timeoutMs: Long = 15_000,
   ): JsonObject? = json.parseToJsonElement(requestGatewayData(gatewayScope, method, paramsJson, timeoutMs)).asObjectOrNull()
 
+  internal suspend fun searchChatMessages(query: String): ChatMessageSearchResult? {
+    if (mode != NodeRuntimeMode.ScreenshotFixture && gatewayAdvertisesMethod("sessions.search") == false) return null
+    val params =
+      buildJsonObject {
+        put("query", query.take(4096))
+        put("limit", 25)
+        put("scope", buildJsonObject { put("archived", false) })
+      }
+    val response =
+      if (mode == NodeRuntimeMode.ScreenshotFixture) {
+        screenshotRequester("sessions.search", params.toString())
+      } else {
+        val gatewayScope = checkNotNull(captureGatewayDataScope()) { "gateway disconnected" }
+        requestGatewayData(gatewayScope, "sessions.search", params.toString(), timeoutMs = 90_000)
+      }
+    return parseChatMessageSearchResult(checkNotNull(json.parseToJsonElement(response).asObjectOrNull()))
+  }
+
   private suspend fun requestGatewayApprovalData(
     gatewayScope: GatewayDataScope,
     methodsSnapshot: GatewayMethodsSnapshot,

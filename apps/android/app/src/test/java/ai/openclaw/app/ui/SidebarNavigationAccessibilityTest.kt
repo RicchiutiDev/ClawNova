@@ -121,11 +121,13 @@ class SidebarNavigationAccessibilityTest {
     prefs.setSidebarPageOrder(personalizedOrder)
     prefs.setSidebarVisiblePages(listOf("agents", "home", "threads"))
     showSidebar()
+    composeRule.onNodeWithText("ClawNova").assertIsDisplayed()
+    composeRule.onNodeWithTag("sidebar-search-toggle").assertIsDisplayed()
     capture("normal-sidebar")
     assertActions("Agents", "Move down")
     assertActions("Home", "Move up", "Move down")
     assertActions("Threads", "Move up")
-    composeRule.onNodeWithText("Overview").assertDoesNotExist()
+    composeRule.onNodeWithText("Last chat").assertDoesNotExist()
     composeRule.onNodeWithText("Skills").assertDoesNotExist()
     val home = composeRule.onNodeWithText("Home").assertIsSelected()
     // Keyboard focus is unavailable in touch mode; TalkBack node identity is checked separately.
@@ -157,16 +159,16 @@ class SidebarNavigationAccessibilityTest {
     editing = true
     capture("editor", popup = true)
     assertActions("Agents", "Move down")
-    assertActions("Overview", "Move up", "Move down")
+    assertActions("Last chat", "Move up", "Move down")
     assertActions("Threads", "Move up", "Move down")
-    invokeMove("Overview", "Move up")
+    invokeMove("Last chat", "Move up")
     assertPersisted(listOf("work", "agents", "home", "skills", "threads"), listOf("home"))
-    assertActions("Overview", "Move down")
-    row("Overview").assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Not pinned"))
-    row("Overview").performClick()
+    assertActions("Last chat", "Move down")
+    row("Last chat").assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Not pinned"))
+    row("Last chat").performClick()
     assertPersisted(listOf("work", "agents", "home", "skills", "threads"), listOf("work", "home"))
-    row("Overview").assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Pinned"))
-    row("Overview").performClick()
+    row("Last chat").assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Pinned"))
+    row("Last chat").performClick()
     row("Home").performClick()
     assertPersisted(listOf("work", "agents", "home", "skills", "threads"), listOf("home"))
     composeRule.runOnIdle { assertTrue(selections.isEmpty()) }
@@ -177,7 +179,7 @@ class SidebarNavigationAccessibilityTest {
     prefs.setSidebarPageOrder(personalizedOrder)
     prefs.setSidebarVisiblePages(personalizedOrder)
     showSidebar()
-    val moveUp = actions("Overview").single { it.label == "Move up" }
+    val moveUp = actions("Last chat").single { it.label == "Move up" }
     composeRule.runOnIdle {
       assertTrue(moveUp.action())
       assertFalse("Already at the boundary; stale action must not report success", moveUp.action())
@@ -196,7 +198,7 @@ class SidebarNavigationAccessibilityTest {
         ShellScreen(model)
       }
     }
-    composeRule.onNodeWithTag("sidebar-open-overview").assertIsDisplayed().performClick()
+    composeRule.onNodeWithContentDescription("Show Sidebar").assertIsDisplayed().performClick()
     capture("default-sidebar")
     assertDefaultRows()
     assertFalse(model.gatewayConnectionDisplay.value.isConnected)
@@ -207,7 +209,7 @@ class SidebarNavigationAccessibilityTest {
     composeRule.onNodeWithContentDescription("Search settings").assertIsDisplayed()
     capture("offline-settings")
     composeRule.runOnIdle { backDispatcher.onBackPressed() }
-    composeRule.onNodeWithTag("sidebar-open-overview").assertIsDisplayed().performClick()
+    composeRule.onNodeWithContentDescription("Show Sidebar").assertIsDisplayed().performClick()
     sidebarRow("Threads").performClick()
     composeRule.onNodeWithContentDescription("Show Sidebar").performClick()
     composeRule.onNodeWithContentDescription("Settings").performClick()
@@ -241,13 +243,13 @@ class SidebarNavigationAccessibilityTest {
 
   private fun assertDefaultRows() {
     val rows =
-      listOf("Home", "Threads", "Skills", "Overview").map {
+      listOf("Home", "Threads", "Skills", "Last chat").map {
         sidebarRow(it)
           .assertIsDisplayed()
           .fetchSemanticsNode()
           .positionInRoot.y
       }
-    assertTrue("Default pages are Home, Threads, Skills, Overview", rows.zipWithNext().all { (a, b) -> a < b })
+    assertTrue("Default pages are Home, Threads, Skills, Last chat", rows.zipWithNext().all { (a, b) -> a < b })
     sidebarRow("Settings").assertDoesNotExist()
   }
 
@@ -260,7 +262,6 @@ class SidebarNavigationAccessibilityTest {
         ClawDesignTheme {
           OpenClawSidebar(
             viewModel = model,
-            agents = emptyList(),
             selectedAgentId = "main",
             sessions = emptyList(),
             activeSessionKey = "agent:main:test",
@@ -270,8 +271,6 @@ class SidebarNavigationAccessibilityTest {
             showCloseButton = false,
             onClose = {},
             onDragActiveChange = {},
-            onNewSession = {},
-            onSelectAgent = {},
             onSelectSession = {},
             onSelectCatalogSession = {},
             onCreateCatalogSession = {},

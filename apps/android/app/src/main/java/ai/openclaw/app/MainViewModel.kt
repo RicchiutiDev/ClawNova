@@ -1449,9 +1449,10 @@ class MainViewModel internal constructor(
     workspace: String? = null,
   ): GatewayAgentSummary = ensureRuntime().createAgent(name, workspace)
 
-  fun beginAgentCreation(
+  internal fun beginAgentCreation(
     name: String,
     workspace: String? = null,
+    onCreated: (GatewayAgentSummary) -> Unit = {},
   ) {
     if (!agentCreationStateMutable.compareAndSet(agentCreationStateMutable.value.takeIf { !it.submitting } ?: return, AgentCreationState(submitting = true))) return
     val runtime =
@@ -1470,7 +1471,13 @@ class MainViewModel internal constructor(
     viewModelScope.launch {
       try {
         val created = runtime.createAgent(name, workspace)
-        agentCreationStateMutable.value = if (current()) AgentCreationState(createdAgent = created) else AgentCreationState()
+        agentCreationStateMutable.value =
+          if (current()) {
+            onCreated(created)
+            AgentCreationState(createdAgent = created)
+          } else {
+            AgentCreationState()
+          }
       } catch (error: kotlinx.coroutines.CancellationException) {
         agentCreationStateMutable.value = AgentCreationState()
         throw error
@@ -1872,6 +1879,8 @@ class MainViewModel internal constructor(
   fun selectChatAgent(agentId: String): Unit = ensureRuntime().selectChatAgent(agentId)
 
   internal suspend fun fetchAgentChatSessions(agentId: String): List<ChatSessionEntry>? = ensureRuntime().chat.fetchSessionSelectionCandidates(agentId)
+
+  internal suspend fun searchChatMessages(query: String): ChatMessageSearchResult? = ensureRuntime().searchChatMessages(query)
 
   suspend fun startNewChatForAgent(agentId: String): Boolean = ensureRuntime().startNewChatForAgent(agentId)
 

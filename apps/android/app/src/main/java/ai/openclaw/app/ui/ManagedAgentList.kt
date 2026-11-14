@@ -5,22 +5,15 @@ import ai.openclaw.app.MainViewModel
 import ai.openclaw.app.R
 import ai.openclaw.app.ui.design.ClawTheme
 import ai.openclaw.app.ui.design.BotAppearance
-import ai.openclaw.app.ui.design.CustomBotAvatar
 import ai.openclaw.app.ui.design.LocalBotAppearance
-import ai.openclaw.app.ui.design.botColors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -38,7 +31,16 @@ import org.json.JSONObject
 private data class AgentArrangement(val primary: String = "", val sections: List<String> = emptyList(), val assignments: Map<String, String> = emptyMap())
 
 @Composable
-internal fun ManagedAgentList(viewModel: MainViewModel, agents: List<GatewayAgentSummary>, matching: List<GatewayAgentSummary>, defaultId: String?, onSelect: (String) -> Unit, onCreate: () -> Unit, modifier: Modifier = Modifier) {
+internal fun ManagedAgentList(
+  viewModel: MainViewModel,
+  agents: List<GatewayAgentSummary>,
+  matching: List<GatewayAgentSummary>,
+  defaultId: String?,
+  onSelect: (String) -> Unit,
+  onCreate: () -> Unit,
+  modifier: Modifier = Modifier,
+  afterAgents: LazyListScope.() -> Unit = {},
+) {
   val gateway by viewModel.activeGatewayStableId.collectAsState()
   val context = LocalContext.current
   val prefs = remember { context.getSharedPreferences("clawnova_agent_arrangement", android.content.Context.MODE_PRIVATE) }
@@ -94,6 +96,7 @@ internal fun ManagedAgentList(viewModel: MainViewModel, agents: List<GatewayAgen
           }
         }
       }
+      afterAgents()
     }
   }
   menuAgent?.let { agent ->
@@ -107,34 +110,11 @@ internal fun ManagedAgentList(viewModel: MainViewModel, agents: List<GatewayAgen
     }, confirmButton = { TextButton(onClick = { menuAgent = null }) { Text(stringResource(R.string.cn_cancel)) } })
   }
   appearanceAgent?.let { agent ->
-    var draft by remember(agent.id) { mutableStateOf(appearances.styles[agent.id] ?: BotAppearance(0, 0)) }
-    val shapeNames = listOf(stringResource(R.string.cn_shape_bubble), stringResource(R.string.cn_shape_round), stringResource(R.string.cn_shape_hexagon), stringResource(R.string.cn_shape_star))
-    val colorNames = listOf(stringResource(R.string.cn_color_red), stringResource(R.string.cn_color_orange), stringResource(R.string.cn_color_yellow), stringResource(R.string.cn_color_green), stringResource(R.string.cn_color_teal), stringResource(R.string.cn_color_blue), stringResource(R.string.cn_color_purple), stringResource(R.string.cn_color_pink))
-    AlertDialog(
-      onDismissRequest = { appearanceAgent = null },
-      title = { Text(stringResource(R.string.cn_edit_bot_icon)) },
-      text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) { CustomBotAvatar(draft, 72.dp) }
-        Text(stringResource(R.string.cn_shape), style = ClawTheme.type.section)
-        shapeNames.forEachIndexed { index, name ->
-          Row(Modifier.fillMaxWidth().selectable(selected = draft.shape == index, role = Role.RadioButton, onClick = { draft = draft.copy(shape = index) }), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-            RadioButton(selected = draft.shape == index, onClick = null)
-            Text(name)
-          }
-        }
-        Text(stringResource(R.string.cn_color), style = ClawTheme.type.section)
-        botColors.chunked(4).forEachIndexed { row, colors -> Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-          colors.forEachIndexed { column, color ->
-            val index = row * 4 + column
-            Box(Modifier.size(44.dp).semantics { contentDescription = colorNames[index] }.selectable(selected = draft.color == index, role = Role.RadioButton, onClick = { draft = draft.copy(color = index) }).padding(4.dp).background(Color(color), CircleShape).border(if (draft.color == index) 3.dp else 0.dp, ClawTheme.colors.text, CircleShape))
-          }
-        } }
-      } },
-      confirmButton = { TextButton(onClick = { appearances.save(agent.id, draft); appearanceAgent = null }) { Text(stringResource(R.string.cn_save)) } },
-      dismissButton = { Row {
-        TextButton(onClick = { appearances.save(agent.id, null); appearanceAgent = null }) { Text(stringResource(R.string.cn_restore_icon)) }
-        TextButton(onClick = { appearanceAgent = null }) { Text(stringResource(R.string.cn_cancel)) }
-      } },
+    BotAppearanceDialog(
+      initial = appearances.styles[agent.id] ?: BotAppearance(0, 0),
+      onSave = { appearances.save(agent.id, it); appearanceAgent = null },
+      onRestore = { appearances.save(agent.id, null); appearanceAgent = null },
+      onDismiss = { appearanceAgent = null },
     )
   }
   moveAgent?.let { agent ->

@@ -45,4 +45,15 @@
   <string name="cn_color_purple">Viola</string>
   <string name="cn_color_pink">Rosa</string>
   <string name="cn_restore_icon">Ripristina</string>
+  <string name="cn_sidebar_shortcuts">Scorciatoie</string>
+  <string name="cn_sidebar_conversations">Conversazioni</string>
+  <string name="cn_sidebar_last_chat">Ultima chat</string>
+  <string name="cn_home_search">Cerca agenti e messaggi</string>
+  <string name="cn_search_messages_heading">Messaggi</string>
+  <string name="cn_searching_messages">Ricerca dei messaggi…</string>
+  <string name="cn_search_messages_offline">Collegati al Gateway per cercare nei messaggi.</string>
+  <string name="cn_search_messages_unavailable">Questo Gateway non supporta la ricerca nei messaggi.</string>
+  <string name="cn_search_messages_partial">I risultati potrebbero essere incompleti.</string>
+  <string name="cn_search_messages_empty">Nessun messaggio corrispondente.</string>
+  <string name="cn_search_messages_failed">Ricerca dei messaggi non riuscita. Prova un’altra ricerca.</string>
 </resources>

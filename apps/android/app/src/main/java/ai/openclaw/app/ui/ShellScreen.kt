@@ -34,6 +34,13 @@ import ai.openclaw.app.ui.design.ClawStatus
 import ai.openclaw.app.ui.design.ClawTheme
 import ai.openclaw.app.ui.design.agentAvatarSource
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -60,7 +67,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DrawerValue
@@ -85,9 +92,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -108,6 +118,27 @@ internal enum class Tab {
   ProvidersModels,
   Files,
   Dashboard,
+}
+
+private data class ShellDestination(
+  val tab: Tab,
+  val settingsRoute: SettingsRoute? = null,
+  val agentId: String? = null,
+  val sessionKey: String? = null,
+  val chatProfileOpen: Boolean = false,
+) {
+  val depth: Int
+    get() = when {
+      tab == Tab.Settings && settingsRoute != null && settingsRoute != SettingsRoute.Home -> 1
+      tab == Tab.AgentChats ||
+        tab == Tab.CreateAgent ||
+        (tab == Tab.Chat && chatProfileOpen) ||
+        tab == Tab.Files ||
+        tab == Tab.Dashboard ||
+        tab == Tab.ProvidersModels -> 1
+      tab == Tab.Chat -> 2
+      else -> 0
+    }
 }
 
 private val overviewListRowMinHeight = 54.dp
@@ -166,6 +197,19 @@ fun ShellScreen(
       val chatSessions by viewModel.chatSessions.collectAsState()
       val chatSessionKey by viewModel.chatSessionKey.collectAsState()
       val gatewayConnectionDisplay by viewModel.gatewayConnectionDisplay.collectAsState()
+      val shellDestination =
+        ShellDestination(
+          tab = nav.activeTab,
+          settingsRoute = nav.settingsRoute.takeIf { nav.activeTab == Tab.Settings },
+          agentId =
+            when {
+              nav.activeTab == Tab.AgentChats -> nav.agentChatsId ?: gatewayDefaultAgentId.orEmpty()
+              nav.activeTab == Tab.Chat && botProfileOpen -> chatSessionOwnerAgentId ?: gatewayDefaultAgentId
+              else -> null
+            },
+          sessionKey = nav.dashboardSessionKey.takeIf { nav.activeTab == Tab.Dashboard },
+          chatProfileOpen = nav.activeTab == Tab.Chat && botProfileOpen,
+        )
 
       LaunchedEffect(requestedHomeDestination) {
         val destination = requestedHomeDestination ?: return@LaunchedEffect
@@ -245,7 +289,6 @@ fun ShellScreen(
           drawerContent = {
             OpenClawSidebar(
               viewModel = viewModel,
-              agents = gatewayAgents,
               selectedAgentId = chatSessionOwnerAgentId ?: gatewayDefaultAgentId,
               sessions = chatSessions,
               activeSessionKey = chatSessionKey,
@@ -257,14 +300,6 @@ fun ShellScreen(
               showCloseButton = !permanentSidebar,
               onClose = closeSidebar,
               onDragActiveChange = { sidebarRowDragging = it },
-              onNewSession = {
-                viewModel.startNewChat(worktree = false)
-                openChat()
-              },
-              onSelectAgent = { agentId ->
-                viewModel.selectChatAgent(agentId)
-                openChat()
-              },
               onSelectSession = { session ->
                 viewModel.switchChatSession(session.key, session.ownerAgentId)
                 openChat()
@@ -282,114 +317,146 @@ fun ShellScreen(
             )
           },
         ) {
-          when (nav.activeTab) {
-            Tab.Overview -> {
-              OverviewScreen(
-                viewModel = viewModel,
-                showSidebarButton = !permanentSidebar,
-                onOpenSidebar = openSidebar,
-                onSelectTab = nav::selectTab,
-                onOpenSettingsRoute = nav::openSettingsRoute,
-                onSelectAgent = nav::openAgentChats,
-                onCreateAgent = {
-                  viewModel.clearAgentCreationResult()
-                  nav.selectTab(Tab.CreateAgent)
-                },
-              )
-            }
+          AnimatedContent(
+            targetState = shellDestination,
+            label = "shell destination",
+            transitionSpec = {
+              val direction = if (targetState.depth >= initialState.depth) 1 else -1
+              (fadeIn(animationSpec = tween(180)) + slideInVertically(animationSpec = tween(220)) { it * direction / 24 }) togetherWith
+                (fadeOut(animationSpec = tween(120)) + slideOutVertically(animationSpec = tween(180)) { -it * direction / 40 })
+            },
+          ) { destination ->
+            val activeTab = destination.tab
+            val isActiveDestination = destination == shellDestination
+            Box(
+              modifier =
+                Modifier
+                  .fillMaxSize()
+                  .pointerInput(isActiveDestination) {
+                    if (!isActiveDestination) {
+                      awaitPointerEventScope {
+                        while (true) {
+                          awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
+                        }
+                      }
+                    }
+                  }.then(if (isActiveDestination) Modifier else Modifier.clearAndSetSemantics {}),
+            ) {
+              when (activeTab) {
+                Tab.Overview -> {
+                  OverviewScreen(
+                    viewModel = viewModel,
+                    showSidebarButton = !permanentSidebar,
+                    onOpenSidebar = openSidebar,
+                    onOpenMessage = { match ->
+                      viewModel.switchChatSession(match.sessionKey, match.agentId)
+                      openChat()
+                    },
+                    onOpenSettingsRoute = nav::openSettingsRoute,
+                    onSelectAgent = nav::openAgentChats,
+                    onCreateAgent = {
+                      viewModel.clearAgentCreationResult()
+                      nav.selectTab(Tab.CreateAgent)
+                    },
+                  )
+                }
 
-            Tab.AgentChats -> {
-              AgentChatsScreen(
-                viewModel = viewModel,
-                agentId = nav.agentChatsId ?: gatewayDefaultAgentId.orEmpty(),
-                onBack = { nav.selectTab(Tab.Overview) },
-                onOpenChat = openChat,
-              )
-            }
+                Tab.AgentChats -> {
+                  AgentChatsScreen(
+                    viewModel = viewModel,
+                    agentId = destination.agentId.orEmpty(),
+                    onBack = { nav.selectTab(Tab.Overview) },
+                    onOpenChat = openChat,
+                  )
+                }
 
-            Tab.CreateAgent -> {
-              CreateAgentScreen(
-                viewModel = viewModel,
-                name = newAgentName,
-                onNameChange = { newAgentName = it },
-                onBack = { nav.selectTab(Tab.Overview) },
-                onCreated = { agent ->
-                  newAgentName = ""
-                  nav.openAgentChats(agent.id)
-                },
-                onOpenGateway = { nav.openSettingsRoute(SettingsRoute.Gateway) },
-              )
-            }
+                Tab.CreateAgent -> {
+                  CreateAgentScreen(
+                    viewModel = viewModel,
+                    name = newAgentName,
+                    onNameChange = { newAgentName = it },
+                    onBack = { nav.selectTab(Tab.Overview) },
+                    onCreated = { agent ->
+                      if (nav.activeTab == Tab.CreateAgent) {
+                        newAgentName = ""
+                        nav.openAgentChats(agent.id)
+                      }
+                    },
+                    onOpenGateway = { nav.openSettingsRoute(SettingsRoute.Gateway) },
+                  )
+                }
 
-            Tab.Chat -> {
-              if (botProfileOpen) {
-                BotProfileScreen(
-                  agent = gatewayAgents.firstOrNull { it.id == (chatSessionOwnerAgentId ?: gatewayDefaultAgentId) },
-                  onBack = { botProfileOpen = false },
-                  onOpenSettingsRoute = {
-                    nav.openSettingsRoute(it)
-                  },
-                  onOpenFiles = {
-                    nav.openDetailTab(Tab.Files)
-                  },
-                )
-              } else {
-                UnifiedChatShellScreen(
-                  viewModel = viewModel,
-                  tabletopPanes = foldBounds.tabletop,
-                  features = features,
-                  showSidebarButton = !permanentSidebar,
-                  onOpenSidebar = openSidebar,
-                  onNavigateBack = {
-                    nav.backFromChat(chatSessionOwnerAgentId ?: gatewayDefaultAgentId)
-                  },
-                  onOpenAgentProfile = { botProfileOpen = true },
-                  onOpenDashboard = nav::openSessionDashboard,
-                  onOpenGatewaySettings = { nav.openSettingsRoute(SettingsRoute.Gateway) },
-                  onOpenProvidersModels = { nav.openDetailTab(Tab.ProvidersModels) },
-                )
+                Tab.Chat -> {
+                  if (destination.chatProfileOpen) {
+                    BotProfileScreen(
+                      agent = gatewayAgents.firstOrNull { it.id == destination.agentId },
+                      onBack = { botProfileOpen = false },
+                      onOpenSettingsRoute = {
+                        nav.openSettingsRoute(it)
+                      },
+                      onOpenFiles = {
+                        nav.openDetailTab(Tab.Files)
+                      },
+                    )
+                  } else {
+                    UnifiedChatShellScreen(
+                      viewModel = viewModel,
+                      tabletopPanes = foldBounds.tabletop,
+                      features = features,
+                      showSidebarButton = !permanentSidebar,
+                      onOpenSidebar = openSidebar,
+                      onNavigateBack = {
+                        nav.backFromChat(chatSessionOwnerAgentId ?: gatewayDefaultAgentId)
+                      },
+                      onOpenAgentProfile = { botProfileOpen = true },
+                      onOpenDashboard = nav::openSessionDashboard,
+                      onOpenGatewaySettings = { nav.openSettingsRoute(SettingsRoute.Gateway) },
+                      onOpenProvidersModels = { nav.openDetailTab(Tab.ProvidersModels) },
+                    )
+                  }
+                }
+
+                Tab.ProvidersModels -> {
+                  ProvidersModelsScreen(
+                    viewModel = viewModel,
+                    onBack = nav::back,
+                  )
+                }
+
+                Tab.Sessions -> {
+                  SessionsScreen(
+                    viewModel = viewModel,
+                    showSidebarButton = !permanentSidebar,
+                    onOpenSidebar = openSidebar,
+                    onOpenChat = openChat,
+                  )
+                }
+
+                Tab.Files -> {
+                  WorkspaceFilesScreen(
+                    viewModel = viewModel,
+                    onBack = nav::back,
+                  )
+                }
+
+                Tab.Dashboard -> {
+                  SessionDashboardScreen(
+                    viewModel = viewModel,
+                    sessionKey = destination.sessionKey ?: "main",
+                    onBack = nav::back,
+                  )
+                }
+
+                Tab.Settings -> {
+                  SettingsShellScreen(
+                    viewModel = viewModel,
+                    route = destination.settingsRoute ?: SettingsRoute.Home,
+                    onRouteChange = nav::openSettingsRouteFromHome,
+                    onBack = nav::back,
+                    onOpenCommand = { commandOpen = true },
+                  )
+                }
               }
-            }
-
-            Tab.ProvidersModels -> {
-              ProvidersModelsScreen(
-                viewModel = viewModel,
-                onBack = nav::back,
-              )
-            }
-
-            Tab.Sessions -> {
-              SessionsScreen(
-                viewModel = viewModel,
-                showSidebarButton = !permanentSidebar,
-                onOpenSidebar = openSidebar,
-                onOpenChat = openChat,
-              )
-            }
-
-            Tab.Files -> {
-              WorkspaceFilesScreen(
-                viewModel = viewModel,
-                onBack = nav::back,
-              )
-            }
-
-            Tab.Dashboard -> {
-              SessionDashboardScreen(
-                viewModel = viewModel,
-                sessionKey = nav.dashboardSessionKey,
-                onBack = nav::back,
-              )
-            }
-
-            Tab.Settings -> {
-              SettingsShellScreen(
-                viewModel = viewModel,
-                route = nav.settingsRoute,
-                onRouteChange = nav::openSettingsRouteFromHome,
-                onBack = nav::back,
-                onOpenCommand = { commandOpen = true },
-              )
             }
           }
         }
@@ -457,7 +524,7 @@ private fun OverviewScreen(
   viewModel: MainViewModel,
   showSidebarButton: Boolean,
   onOpenSidebar: () -> Unit,
-  onSelectTab: (Tab) -> Unit,
+  onOpenMessage: (ai.openclaw.app.ChatMessageMatch) -> Unit,
   onOpenSettingsRoute: (SettingsRoute) -> Unit,
   onSelectAgent: (String) -> Unit,
   onCreateAgent: () -> Unit,
@@ -465,7 +532,6 @@ private fun OverviewScreen(
   val connection by viewModel.gatewayConnectionDisplay.collectAsState()
   val agents by viewModel.gatewayAgents.collectAsState()
   val defaultAgentId by viewModel.gatewayDefaultAgentId.collectAsState()
-  val displayName by viewModel.displayName.collectAsState()
   var query by rememberSaveable { mutableStateOf("") }
   SettingsRefreshOnConnect(connection.isConnected) { viewModel.refreshAgents() }
   val availableAgents = agents.selectableAgents()
@@ -478,12 +544,16 @@ private fun OverviewScreen(
     contentWindowInsets = WindowInsets.safeDrawing,
   ) {
     Column(modifier = Modifier.fillMaxSize().testTag("agents-home")) {
-      HomeHeader(displayName = displayName, onOpenProfile = { onSelectTab(Tab.Settings) }, onCreateAgent = onCreateAgent)
-      ManagedAgentList(viewModel, availableAgents, matchingAgents, defaultAgentId, onSelectAgent, onCreateAgent, Modifier.weight(1f))
+      HomeHeader(showSidebarButton, onOpenSidebar, onCreateAgent)
+      ManagedAgentList(viewModel, availableAgents, matchingAgents, defaultAgentId, onSelectAgent, onCreateAgent, Modifier.weight(1f)) {
+        if (query.isNotBlank()) {
+          item(key = "message-search") {
+            HomeMessageSearch(viewModel, query.trim(), connection.isConnected, onOpenMessage)
+          }
+        }
+      }
       HomeSearchDock(
-        showSidebarButton = showSidebarButton,
         status = overviewHeaderState(connection.isConnected, hasAttention = false),
-        onOpenSidebar = onOpenSidebar,
         onOpenGateway = { onOpenSettingsRoute(SettingsRoute.Gateway) },
         query = query,
         onQueryChange = { query = it },
@@ -494,26 +564,15 @@ private fun OverviewScreen(
 
 @Composable
 private fun HomeHeader(
-  displayName: String,
-  onOpenProfile: () -> Unit,
+  showSidebarButton: Boolean,
+  onOpenSidebar: () -> Unit,
   onCreateAgent: () -> Unit,
 ) {
-  val profileDescription = nativeString("Open profile")
   Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-    Box(
-      modifier = Modifier.size(48.dp).clip(CircleShape).clickable(onClick = onOpenProfile),
-      contentAlignment = Alignment.Center,
-    ) {
-      Surface(shape = CircleShape, color = ClawTheme.colors.surfaceRaised) {
-        Box(modifier = Modifier.size(34.dp), contentAlignment = Alignment.Center) {
-          Text(
-            text = localizedInitial(displayName, currentAppLanguage().languageTag) ?: "C",
-            style = ClawTheme.type.caption,
-            color = ClawTheme.colors.text,
-            modifier = Modifier.semantics { contentDescription = profileDescription },
-          )
-        }
-      }
+    if (showSidebarButton) {
+      HomeRoundAction(icon = Icons.Default.Menu, description = nativeString("Show Sidebar"), onClick = onOpenSidebar)
+    } else {
+      Spacer(Modifier.size(48.dp))
     }
     Text(nativeString("Agents"), style = ClawTheme.type.title, color = ClawTheme.colors.text, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
     HomeRoundAction(icon = Icons.Default.Add, description = stringResource(R.string.clawnova_new_agent), onClick = onCreateAgent)
@@ -531,7 +590,7 @@ private fun HomeRoundAction(
       Modifier
         .size(48.dp)
         .clip(CircleShape)
-        .clickable(onClick = onClick)
+        .clickable(role = Role.Button, onClick = onClick)
         .semantics { contentDescription = description },
     contentAlignment = Alignment.Center,
   ) {
@@ -597,9 +656,7 @@ internal fun HomeBotRow(
 
 @Composable
 private fun HomeSearchDock(
-  showSidebarButton: Boolean,
   status: OverviewHeaderState,
-  onOpenSidebar: () -> Unit,
   onOpenGateway: () -> Unit,
   query: String,
   onQueryChange: (String) -> Unit,
@@ -609,7 +666,6 @@ private fun HomeSearchDock(
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(4.dp),
   ) {
-    if (showSidebarButton) HomeRoundAction(icon = Icons.Default.GridView, description = nativeString("Show Sidebar"), onClick = onOpenSidebar)
     val searchLabel = nativeString("Search")
     Surface(modifier = Modifier.weight(1f), color = ClawTheme.colors.surfaceRaised, shape = CircleShape) {
       BasicTextField(
@@ -623,7 +679,7 @@ private fun HomeSearchDock(
           Row(modifier = Modifier.heightIn(min = 48.dp).padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(20.dp), tint = ClawTheme.colors.textMuted)
             Box(modifier = Modifier.weight(1f)) {
-              if (query.isEmpty()) Text(searchLabel, style = ClawTheme.type.label, color = ClawTheme.colors.textMuted)
+              if (query.isEmpty()) Text(stringResource(R.string.cn_home_search), style = ClawTheme.type.label, color = ClawTheme.colors.textMuted)
               editor()
             }
           }

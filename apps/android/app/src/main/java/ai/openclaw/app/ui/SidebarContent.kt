@@ -1,6 +1,5 @@
 package ai.openclaw.app.ui
 
-import ai.openclaw.app.GatewayAgentSummary
 import ai.openclaw.app.GatewayConnectionDisplay
 import ai.openclaw.app.MainViewModel
 import ai.openclaw.app.R
@@ -21,19 +20,26 @@ import ai.openclaw.app.operatorScopesAllowWrite
 import ai.openclaw.app.sanitizeSidebarPageOrder
 import ai.openclaw.app.ui.design.ClawColors
 import ai.openclaw.app.ui.design.ClawIcons
+import ai.openclaw.app.ui.design.ClawSecondaryButton
 import ai.openclaw.app.ui.design.ClawTheme
-import ai.openclaw.app.ui.design.OpenClawMascot
 import ai.openclaw.app.ui.design.ProviderBrandIcon
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -77,11 +83,14 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
@@ -124,8 +133,8 @@ internal enum class SidebarDestination(
   val icon: ImageVector = checkNotNull(settingsRoute).icon,
 ) {
   Settings(stableId = "settings", settingsRoute = SettingsRoute.Home),
-  Work(stableId = "work", tab = Tab.Overview, icon = ClawIcons.Overview),
-  Home(stableId = "home", tab = Tab.Chat, icon = ClawIcons.Chat),
+  LastChat(stableId = "work", tab = Tab.Chat, icon = ClawIcons.Chat),
+  Home(stableId = "home", tab = Tab.Overview, icon = ClawIcons.Overview),
   Skills(stableId = "skills", settingsRoute = SettingsRoute.Skills),
   Threads(stableId = "threads", tab = Tab.Sessions, icon = ClawIcons.Threads),
   Agents(stableId = "agents", settingsRoute = SettingsRoute.Agents),
@@ -136,9 +145,10 @@ internal enum class SidebarDestination(
   Desktop(stableId = "desktop", settingsRoute = SettingsRoute.Desktop),
 }
 
+@Composable
 internal fun SidebarDestination.localizedLabel(): String =
   when (this) {
-    SidebarDestination.Work -> nativeString("Overview")
+    SidebarDestination.LastChat -> stringResource(R.string.cn_sidebar_last_chat)
     SidebarDestination.Home -> nativeString("Home")
     SidebarDestination.Threads -> nativeString("Threads")
     else -> checkNotNull(settingsRoute).title.resolveNativeText()
@@ -456,7 +466,6 @@ internal fun sidebarSectionWindow(
 @Composable
 internal fun OpenClawSidebar(
   viewModel: MainViewModel,
-  agents: List<GatewayAgentSummary>,
   selectedAgentId: String?,
   sessions: List<ChatSessionEntry>,
   activeSessionKey: String,
@@ -466,8 +475,6 @@ internal fun OpenClawSidebar(
   showCloseButton: Boolean,
   onClose: () -> Unit,
   onDragActiveChange: (Boolean) -> Unit,
-  onNewSession: () -> Unit,
-  onSelectAgent: (String) -> Unit,
   onSelectSession: (ChatSessionEntry) -> Unit,
   onSelectCatalogSession: (SessionCatalogEntry) -> Unit,
   onCreateCatalogSession: (String) -> Unit,
@@ -478,7 +485,6 @@ internal fun OpenClawSidebar(
   val scope = rememberCoroutineScope()
   val lifecycle = LocalLifecycleOwner.current.lifecycle
   val scrollState = rememberScrollState()
-  val agentPicker = agentPickerState(agents, selectedAgentId)
   val localGroups by viewModel.sessionCustomGroups.collectAsState()
   val groupCatalog by viewModel.sessionGroupCatalog.collectAsState()
   val rosterHasMore by viewModel.sessionRosterHasMore.collectAsState()
@@ -693,64 +699,34 @@ internal fun OpenClawSidebar(
         .fillMaxSize()
         .background(palette.background)
         .windowInsetsPadding(WindowInsets.safeDrawing)
-        .padding(horizontal = 14.dp, vertical = 10.dp),
+        .padding(horizontal = 12.dp, vertical = 8.dp),
   ) {
-    // The compact search field is opt-in from the header, matching the web sidebar.
+    val headerShape = RoundedCornerShape(18.dp)
     Row(
-      modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+      modifier =
+        Modifier
+          .fillMaxWidth()
+          .clip(headerShape)
+          .background(Brush.linearGradient(listOf(ClawTheme.colors.accentSoft, ClawTheme.colors.surface)))
+          .border(1.dp, palette.hairline, headerShape)
+          .padding(horizontal = 10.dp, vertical = 6.dp)
+          .heightIn(min = 48.dp),
       verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(4.dp),
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      if (agentPicker.selected != null) {
-        AgentPicker(
-          state = agentPicker,
-          onSelectAgent = onSelectAgent,
-          modifier = Modifier.weight(1f),
-        )
-      } else {
-        OpenClawMascot(modifier = Modifier.size(28.dp))
-        Text(
-          text = "OpenClaw",
-          modifier = Modifier.weight(1f),
-          style = ClawTheme.type.title,
-          color = palette.text,
-          maxLines = 1,
-        )
-      }
-      IconButton(
-        onClick = {
-          if (searchVisible) query = ""
-          searchVisible = !searchVisible
-        },
-        modifier = Modifier.size(48.dp).testTag("sidebar-search-toggle"),
+      Box(
+        modifier = Modifier.size(38.dp).clip(RoundedCornerShape(11.dp)).background(ClawTheme.colors.canvas),
+        contentAlignment = Alignment.Center,
       ) {
-        Icon(
-          imageVector = Icons.Default.Search,
-          contentDescription = nativeString(if (searchVisible) "Hide search" else "Search sessions"),
-          tint = palette.text,
-          modifier = Modifier.size(20.dp),
-        )
+        Image(painterResource(R.drawable.clawnova_launcher_foreground), contentDescription = null, modifier = Modifier.size(46.dp))
       }
-      IconButton(
-        onClick = onNewSession,
-        enabled = !sessionCreating,
-        modifier =
-          Modifier.size(48.dp).semantics {
-            contentDescription = nativeString("New session")
-            if (sessionCreating) stateDescription = nativeString("Loading")
-          },
-      ) {
-        if (sessionCreating) {
-          CircularProgressIndicator(modifier = Modifier.size(22.dp), strokeWidth = 2.dp, color = palette.text)
-        } else {
-          Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = null,
-            tint = palette.text,
-            modifier = Modifier.size(22.dp),
-          )
-        }
-      }
+      Text(
+        text = stringResource(R.string.clawnova_app_name),
+        modifier = Modifier.weight(1f).semantics { heading() },
+        style = ClawTheme.type.title.copy(fontWeight = FontWeight.SemiBold),
+        color = palette.text,
+        maxLines = 1,
+      )
       if (showCloseButton) {
         IconButton(onClick = onClose, modifier = Modifier.size(48.dp).testTag("sidebar-close")) {
           Icon(
@@ -762,7 +738,16 @@ internal fun OpenClawSidebar(
         }
       }
     }
-    if (searchVisible) {
+    ClawSecondaryButton(
+      text = nativeString(if (searchVisible) "Hide search" else "Search sessions"),
+      icon = if (searchVisible) Icons.Default.Close else Icons.Default.Search,
+      onClick = {
+        if (searchVisible) query = ""
+        searchVisible = !searchVisible
+      },
+      modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 6.dp).testTag("sidebar-search-toggle"),
+    )
+    AnimatedVisibility(visible = searchVisible, enter = expandVertically(), exit = shrinkVertically()) {
       SidebarSearchField(
         query = query,
         onQueryChange = { query = it },
@@ -824,28 +809,33 @@ internal fun OpenClawSidebar(
             onDragActiveChange = onDragActiveChange,
           )
           if (pagesExpanded) {
-            visiblePages.forEachIndexed { index, destination ->
-              key(destination.stableId) {
-                SidebarNavigationRow(
-                  destination = destination,
-                  selected = destination == activeDestination,
-                  palette = palette,
-                  onClick = { onSelectDestination(destination) },
-                  canMoveUp = index > 0,
-                  canMoveDown = index < visiblePages.lastIndex,
-                  onMove = { direction -> movePage(destination, direction, visibleOnly = true) },
-                  onDragActiveChange = onDragActiveChange,
-                )
+            Column(
+              modifier = Modifier.fillMaxWidth().background(ClawTheme.colors.surface, RoundedCornerShape(14.dp)).padding(4.dp),
+            ) {
+              visiblePages.forEachIndexed { index, destination ->
+                key(destination.stableId) {
+                  SidebarNavigationRow(
+                    destination = destination,
+                    selected = destination == activeDestination,
+                    palette = palette,
+                    onClick = { onSelectDestination(destination) },
+                    canMoveUp = index > 0,
+                    canMoveDown = index < visiblePages.lastIndex,
+                    onMove = { direction -> movePage(destination, direction, visibleOnly = true) },
+                    onDragActiveChange = onDragActiveChange,
+                  )
+                }
               }
             }
           }
+          Spacer(Modifier.height(12.dp))
+          SidebarSectionTitle(stringResource(R.string.cn_sidebar_conversations), palette)
           SidebarCollapsibleHeader(
             label = nativeString("Pinned"),
             attention = if (pinnedExpanded) null else attentionFor(pinnedSessions.map { sidebarAttentionSessionKey(it.key, it.ownerAgentId ?: selectedAgentId ?: defaultAgentId) }),
             expanded = pinnedExpanded,
             palette = palette,
             onClick = { pinnedExpanded = !pinnedExpanded },
-            modifier = Modifier.padding(top = 10.dp),
           )
           if (pinnedExpanded) {
             if (pinnedSessions.isEmpty()) {
@@ -997,8 +987,11 @@ internal fun OpenClawSidebar(
         }
       }
     }
-    HorizontalDivider(color = palette.hairline)
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+      modifier =
+        Modifier.fillMaxWidth().padding(top = 8.dp).clip(RoundedCornerShape(15.dp)).background(ClawTheme.colors.surface),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
       Box(Modifier.weight(1f)) {
         SidebarGatewayControl(viewModel, connection, palette) {
           viewModel.openGatewaySettings()
@@ -1007,7 +1000,7 @@ internal fun OpenClawSidebar(
       }
       IconButton(
         onClick = { onSelectDestination(SidebarDestination.Settings) },
-        modifier = Modifier.size(48.dp),
+        modifier = Modifier.padding(end = 4.dp).size(48.dp),
       ) {
         Icon(
           imageVector = SettingsRoute.Home.icon,
@@ -1053,8 +1046,8 @@ private fun SidebarPagesHeader(
     ) {
       SidebarDisclosureIcon(expanded, palette)
       Text(
-        text = nativeString("Pages"),
-        style = ClawTheme.type.caption.copy(fontWeight = FontWeight.Medium),
+        text = stringResource(R.string.cn_sidebar_shortcuts),
+        style = ClawTheme.type.caption.copy(fontWeight = FontWeight.SemiBold),
         color = palette.muted,
         maxLines = 1,
       )

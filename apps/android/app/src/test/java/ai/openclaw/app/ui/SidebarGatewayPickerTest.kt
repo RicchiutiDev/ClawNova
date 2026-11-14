@@ -1107,7 +1107,6 @@ class SidebarGatewayPickerTest {
     restoration.setContent {
       if (mounted.value) {
         val connection by model.gatewayConnectionDisplay.collectAsState()
-        val agents by model.gatewayAgents.collectAsState()
         val sessions by model.chatSessions.collectAsState()
         val sessionKey by model.chatSessionKey.collectAsState()
         val density = LocalDensity.current
@@ -1122,7 +1121,6 @@ class SidebarGatewayPickerTest {
                 Box(Modifier.width(300.dp)) {
                   OpenClawSidebar(
                     viewModel = model,
-                    agents = agents,
                     selectedAgentId = null,
                     sessions = sessions,
                     activeSessionKey = sessionKey,
@@ -1132,8 +1130,6 @@ class SidebarGatewayPickerTest {
                     showCloseButton = false,
                     onClose = {},
                     onDragActiveChange = {},
-                    onNewSession = {},
-                    onSelectAgent = {},
                     onSelectSession = {},
                     onSelectCatalogSession = {},
                     onCreateCatalogSession = {},

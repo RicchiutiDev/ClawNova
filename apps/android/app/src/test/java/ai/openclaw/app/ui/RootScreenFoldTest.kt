@@ -425,7 +425,7 @@ class RootScreenFoldTest {
 
   @Test
   fun sidebarLongPressDragReordersPages() {
-    withRoot(completed = true, destination = HomeDestination.Chat) { model ->
+    withRoot(completed = true, destination = HomeDestination.Connect) { model ->
       model.setSidebarPageOrder(listOf("agents"))
       model.setSidebarVisiblePages(model.sidebarPageOrder.value)
       composeRule.onNodeWithContentDescription("Show Sidebar").performClick()
@@ -780,8 +780,10 @@ class RootScreenFoldTest {
 
   @Test
   fun bookKeepsSidebarSearchAcrossModalMovesAndUsesOffCenterRtlPlanes() {
-    withRoot(completed = true) {
-      composeRule.onNodeWithTag("sidebar-open-settings").performClick()
+    withRoot(completed = true, destination = HomeDestination.Connect) {
+      val sidebarButton = composeRule.onNodeWithContentDescription("Show Sidebar")
+      val home = composeRule.onNodeWithTag("agents-home")
+      sidebarButton.performClick()
       composeRule.onNodeWithTag("sidebar-search-toggle").performClick()
       val search = composeRule.onNodeWithTag("sidebar-search")
       search.performClick().performTextReplacement("retained search")
@@ -793,16 +795,16 @@ class RootScreenFoldTest {
       search.assertTextContains("retained search")
       focusedAfterMove += search.fetchSemanticsNode().config[SemanticsProperties.Focused]
       assertTrue(windowBounds(search).right <= hinge.left)
-      composeRule.onNodeWithContentDescription("Search settings").assertIsDisplayed()
+      home.assertIsDisplayed()
       composeRule.runOnIdle { direction = LayoutDirection.Rtl }
       search.assertTextContains("retained search")
       focusedAfterMove += search.fetchSemanticsNode().config[SemanticsProperties.Focused]
       assertEquals(editorId, search.fetchSemanticsNode().id)
       assertTrue(windowBounds(search).left >= hinge.right)
-      assertTrue(windowBounds(composeRule.onNodeWithContentDescription("Search settings")).right <= hinge.left)
+      assertTrue(windowBounds(home).right <= hinge.left)
       emit(emptyList())
       search.assertIsNotDisplayed().assertIsNotFocused()
-      composeRule.onNodeWithTag("sidebar-open-settings").performClick()
+      sidebarButton.performClick()
       search.assertTextContains("retained search").assertIsDisplayed()
       assertEquals(editorId, search.fetchSemanticsNode().id)
       assertEquals("Keep search focus through the book and RTL transitions", listOf(true, true), focusedAfterMove)
@@ -813,7 +815,7 @@ class RootScreenFoldTest {
       assertTrue("RTL navigation must use the physical right side", windowBounds(search).left >= 640)
       resize(800.dp)
       search.assertIsNotDisplayed().assertIsNotFocused()
-      composeRule.onNodeWithTag("sidebar-open-settings").performClick()
+      sidebarButton.performClick()
       search.assertIsDisplayed().assertTextContains("retained search")
       assertEquals(editorId, search.fetchSemanticsNode().id)
       assertEquals(TextRange(9, 15), search.fetchSemanticsNode().config[SemanticsProperties.TextSelectionRange])
@@ -871,7 +873,7 @@ class RootScreenFoldTest {
           .config[SemanticsProperties.VerticalScrollAxisRange]
           .value(),
       )
-      composeRule.onNode(hasText("Home") and hasAnyAncestor(hasTestTag("sidebar-permanent"))).performScrollTo().performClick()
+      composeRule.onNode(hasText("Last chat") and hasAnyAncestor(hasTestTag("sidebar-permanent"))).performScrollTo().performClick()
       composeRule.onNodeWithTag("chat-composer-surface").assertIsDisplayed()
       composeRule.onNodeWithTag("sidebar-permanent").assertIsDisplayed()
       composeRule.onNodeWithContentDescription("Settings").assertIsDisplayed().performClick()
@@ -918,7 +920,7 @@ class RootScreenFoldTest {
         composeRule.onNodeWithTag("sidebar-permanent").assertIsDisplayed()
         composeRule.onNodeWithTag("sidebar-drawer").assertIsNotDisplayed()
         Settings.Global.putFloat(view.context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 0f)
-        composeRule.onNode(hasText("Home") and hasAnyAncestor(hasTestTag("sidebar-permanent"))).performTouchInput { click() }
+        composeRule.onNode(hasText("Last chat") and hasAnyAncestor(hasTestTag("sidebar-permanent"))).performTouchInput { click() }
         composeRule.onNodeWithTag("chat-composer-surface").assertIsDisplayed()
         setPermanentSidebar(expandedWindow, visible = false)
         composeRule.runOnIdle { backDispatcher.onBackPressed() }

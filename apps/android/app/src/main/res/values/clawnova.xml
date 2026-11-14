@@ -46,4 +46,15 @@
   <string name="cn_color_purple">Purple</string>
   <string name="cn_color_pink">Pink</string>
   <string name="cn_restore_icon">Restore default</string>
+  <string name="cn_sidebar_shortcuts">Shortcuts</string>
+  <string name="cn_sidebar_conversations">Conversations</string>
+  <string name="cn_sidebar_last_chat">Last chat</string>
+  <string name="cn_home_search">Search agents and messages</string>
+  <string name="cn_search_messages_heading">Messages</string>
+  <string name="cn_searching_messages">Searching messages…</string>
+  <string name="cn_search_messages_offline">Connect to your Gateway to search messages.</string>
+  <string name="cn_search_messages_unavailable">This Gateway does not support message search.</string>
+  <string name="cn_search_messages_partial">Results may be incomplete.</string>
+  <string name="cn_search_messages_empty">No matching messages.</string>
+  <string name="cn_search_messages_failed">Could not search messages. Try another query.</string>
 </resources>

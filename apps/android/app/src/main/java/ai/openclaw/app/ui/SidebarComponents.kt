@@ -256,11 +256,21 @@ internal fun SidebarNavigationRow(
       selected = selected,
       onClick = onClick,
       icon = {
-        Icon(
-          imageVector = destination.icon,
-          contentDescription = null,
-          modifier = Modifier.size(20.dp),
-        )
+        Box(
+          modifier =
+            Modifier
+              .size(30.dp)
+              .clip(RoundedCornerShape(8.dp))
+              .background(if (selected) ClawTheme.colors.primary else palette.elevated),
+          contentAlignment = Alignment.Center,
+        ) {
+          Icon(
+            imageVector = destination.icon,
+            contentDescription = null,
+            tint = if (selected) ClawTheme.colors.primaryText else palette.muted,
+            modifier = Modifier.size(17.dp),
+          )
+        }
       },
       modifier =
         Modifier

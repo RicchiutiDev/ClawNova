@@ -30,6 +30,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasClickAction
@@ -132,8 +133,64 @@ class OverviewLayoutTest {
     composeRule.onNodeWithContentDescription("Search").assertIsDisplayed()
     composeRule.onNode(hasText(AndroidScreenshotFixture.primarySessionTitle) and hasAnyAncestor(hasTestTag("agents-home"))).assertDoesNotExist()
     capture("home")
-    composeRule.onNodeWithContentDescription("Open profile").performClick()
+    composeRule.onNodeWithContentDescription("Show Sidebar").assertIsDisplayed().performClick()
+    composeRule.onNodeWithContentDescription("Settings").performClick()
     composeRule.onNodeWithContentDescription("Search settings").assertIsDisplayed()
+  }
+
+  @Test
+  fun homeSearchFindsMessageTextAndOpensItsConversation() {
+    composeRule.setContent { ShellScreen(model) }
+    composeRule.onNodeWithContentDescription("Search").performTextReplacement("checklist")
+    composeRule.waitUntil(timeoutMillis = 5_000) {
+      composeRule.onAllNodesWithText("Check the release checklist and summarize what is ready.").fetchSemanticsNodes().isNotEmpty()
+    }
+    composeRule.onNodeWithText("Check the release checklist and summarize what is ready.").assertIsDisplayed()
+    capture("home-message-search")
+    composeRule.onNodeWithText("Check the release checklist and summarize what is ready.").performClick()
+    composeRule.onNodeWithContentDescription("Chat actions").assertIsDisplayed()
+    assertEquals(AndroidScreenshotFixture.mainSessionKey, model.chatSessionKey.value)
+  }
+
+  @Test
+  fun newChatIsOnlyOfferedAfterChoosingAnAgentFromHome() {
+    composeRule.setContent { ShellScreen(model) }
+    composeRule.waitUntil { model.gatewayAgents.value.isNotEmpty() }
+
+    composeRule.onNodeWithContentDescription("Show Sidebar").performClick()
+    composeRule.onNodeWithTag("sidebar-close").assertIsDisplayed()
+    composeRule.onNodeWithText("Active agent").assertDoesNotExist()
+    composeRule.onNodeWithText("New chat").assertDoesNotExist()
+    composeRule.onNodeWithTag("sidebar-search-toggle").assertIsDisplayed()
+    capture("sidebar-home")
+    composeRule.onNodeWithTag("sidebar-close").performClick()
+
+    composeRule.onNodeWithTag("home-primary-bot").performClick()
+    composeRule.onNodeWithTag("agent-chats").assertIsDisplayed()
+    composeRule.onNode(hasContentDescription("New chat") and hasAnyAncestor(hasTestTag("agent-chats"))).assertIsEnabled()
+  }
+
+  @Test
+  fun sidebarHomeOpensTheAgentListEvenWithAnOpenChat() {
+    composeRule.setContent { ShellScreen(model) }
+    composeRule.waitUntil { model.gatewayAgents.value.isNotEmpty() }
+    composeRule.onNodeWithTag("home-primary-bot").performClick()
+    composeRule.onNodeWithText(AndroidScreenshotFixture.primarySessionTitle).performScrollTo().performClick()
+    composeRule.onNodeWithContentDescription("Chat actions").assertIsDisplayed()
+    val openSessionKey = model.chatSessionKey.value
+    composeRule.onNodeWithContentDescription("Back").performClick()
+    composeRule.onNodeWithContentDescription("Back").performClick()
+
+    composeRule.onNodeWithContentDescription("Show Sidebar").performClick()
+    composeRule.onNode(hasText("Home") and hasAnyAncestor(hasTestTag("sidebar-drawer"))).performScrollTo().performClick()
+
+    composeRule.onNodeWithTag("agents-home").assertIsDisplayed()
+    composeRule.onNodeWithContentDescription("Chat actions").assertDoesNotExist()
+    assertEquals(openSessionKey, model.chatSessionKey.value)
+    composeRule.onNodeWithContentDescription("Show Sidebar").performClick()
+    composeRule.onNode(hasText("Last chat") and hasAnyAncestor(hasTestTag("sidebar-drawer"))).performScrollTo().performClick()
+    composeRule.onNodeWithContentDescription("Chat actions").assertIsDisplayed()
+    assertEquals(openSessionKey, model.chatSessionKey.value)
   }
 
   @Test
@@ -234,7 +291,16 @@ class OverviewLayoutTest {
     composeRule.setContent { ShellScreen(model) }
     composeRule.onNodeWithContentDescription("New agent").assertIsDisplayed().performClick()
     composeRule.onNodeWithTag("create-agent").assertIsDisplayed()
+    composeRule.onNodeWithTag("create-agent-default-avatar").assertIsDisplayed()
     composeRule.onNodeWithText("Create").assertIsNotEnabled()
+    composeRule.onNodeWithText("Customize bot icon").performClick()
+    composeRule.onNodeWithTag("bot-appearance-shape-1").performClick()
+    composeRule.onNodeWithText("Cancel").performClick()
+    composeRule.onNodeWithTag("create-agent-default-avatar").assertIsDisplayed()
+    composeRule.onNodeWithText("Customize bot icon").performClick()
+    composeRule.onNodeWithTag("bot-appearance-shape-2").performClick()
+    composeRule.onNodeWithText("Save").performClick()
+    composeRule.onNodeWithTag("create-agent-custom-avatar").assertIsDisplayed()
     composeRule.onNode(hasSetTextAction()).performTextReplacement("Research assistant")
     composeRule.onNodeWithText("Create").assertIsEnabled()
     capture("create-agent")
@@ -269,15 +335,37 @@ class OverviewLayoutTest {
   }
 
   @Test
-  fun voiceSettingsRemainAccessibleFromProfileSettings() {
+  fun voiceSettingsRemainAccessibleFromTheHomeMenu() {
     composeRule.setContent { ShellScreen(model) }
-    composeRule.onNodeWithContentDescription("Open profile").performClick()
+    composeRule.onNodeWithContentDescription("Show Sidebar").performClick()
+    composeRule.onNodeWithContentDescription("Settings").performClick()
     composeRule.onNodeWithText("Voice").performScrollTo().performClick()
     composeRule.onNodeWithText("Configure wake words, talk, and playback.").assertIsDisplayed()
     composeRule.onNodeWithContentDescription("Back").performClick()
     composeRule.onNodeWithText("Settings").assertIsDisplayed()
     composeRule.onNodeWithContentDescription("Close").performClick()
-    composeRule.onNodeWithText("Search").assertIsDisplayed()
+    composeRule.onNodeWithContentDescription("Search").assertIsDisplayed()
+  }
+
+  @Test
+  fun settingsSlideIntoPlaceWhenRequested() {
+    Settings.Global.putFloat(app.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
+    composeRule.setContent { ShellScreen(model) }
+    val close = composeRule.onNodeWithContentDescription("Close")
+
+    composeRule.onNodeWithTag("agents-home").assertIsDisplayed()
+    composeRule.mainClock.autoAdvance = false
+    try {
+      composeRule.runOnIdle { model.requestHomeDestination(ai.openclaw.app.HomeDestination.Settings) }
+      composeRule.mainClock.advanceTimeBy(64)
+      val enteringTop = close.getUnclippedBoundsInRoot().top
+
+      composeRule.mainClock.advanceTimeBy(250)
+      assertTrue(enteringTop > close.getUnclippedBoundsInRoot().top)
+      composeRule.onNodeWithTag("agents-home").assertDoesNotExist()
+    } finally {
+      composeRule.mainClock.autoAdvance = true
+    }
   }
 
   @Test

@@ -406,18 +406,27 @@ android {
     create("standard") {
       dimension = "store"
       applicationId = "dev.ricchiutidev.clawnova"
-      versionName = "0.1"
-      versionCode = 1
+      versionName = "0.1.5"
+      versionCode = 6
+      manifestPlaceholders["nodeForegroundServiceType"] = "connectedDevice|microphone"
+      buildConfigField("boolean", "NOTIFICATION_LISTENER_ENABLED", "false")
+    }
+    create("standardLegacy") {
+      dimension = "store"
+      applicationId = openClawAndroidApplicationId
+      versionName = "0.1.5"
+      // Continue the version sequence of the original Standard debug APKs.
+      versionCode = 2026080206
       manifestPlaceholders["nodeForegroundServiceType"] = "connectedDevice|microphone"
       buildConfigField("boolean", "NOTIFICATION_LISTENER_ENABLED", "false")
     }
   }
 
   // Reuse the existing implementations that omit SMS, call logs and accessibility control.
-  sourceSets
-    .getByName("standard")
-    .kotlin.directories
-    .add("src/play/java")
+  listOf("standard", "standardLegacy").forEach { flavor ->
+    sourceSets.getByName(flavor).kotlin.directories.add("src/play/java")
+  }
+  sourceSets.getByName("standardLegacy").manifest.srcFile("src/standard/AndroidManifest.xml")
 
   buildTypes {
     release {
@@ -514,6 +523,9 @@ android {
 
 androidComponents {
   val adbExecutable = sdkComponents.adb
+  beforeVariants(selector().withFlavor("store" to "standardLegacy").withBuildType("release")) { variant ->
+    variant.enable = false
+  }
   onVariants { variant ->
     variant.outputs
       .filterIsInstance<VariantOutputImpl>()

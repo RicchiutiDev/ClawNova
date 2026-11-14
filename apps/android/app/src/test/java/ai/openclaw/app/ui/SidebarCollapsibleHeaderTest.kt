@@ -84,7 +84,6 @@ class SidebarCollapsibleHeaderTest {
             ClawDesignTheme {
               OpenClawSidebar(
                 viewModel = model,
-                agents = emptyList(),
                 selectedAgentId = "main",
                 sessions = emptyList(),
                 activeSessionKey = "agent:main:test",
@@ -94,8 +93,6 @@ class SidebarCollapsibleHeaderTest {
                 showCloseButton = false,
                 onClose = {},
                 onDragActiveChange = {},
-                onNewSession = {},
-                onSelectAgent = {},
                 onSelectSession = {},
                 onSelectCatalogSession = {},
                 onCreateCatalogSession = {},
