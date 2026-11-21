@@ -1,5 +1,6 @@
 package ai.openclaw.app
 
+import ai.openclaw.app.chat.AgentExchangeHistory
 import ai.openclaw.app.chat.ChatActiveRunPresentation
 import ai.openclaw.app.chat.ChatCommandEntry
 import ai.openclaw.app.chat.ChatComposerOwner
@@ -565,6 +566,9 @@ class MainViewModel internal constructor(
   internal val gatewayComposerDefaultAgentOwner: StateFlow<GatewayDefaultAgentOwner?> =
     runtimeState(initial = null) { it.chat.composerDefaultAgentOwner }
   val gatewayAgents: StateFlow<List<GatewayAgentSummary>> = runtimeState(initial = emptyList()) { it.gatewayAgents }
+  internal val workingAgents = runtimeState(initial = emptySet()) { it.agentActivity.workingAgents }
+  internal val liveAgentExchanges = runtimeState(initial = emptyList()) { it.agentActivity.exchanges }
+  internal val agentExchangeHistoryInvalidation = runtimeState(initial = 0L) { it.agentActivity.historyInvalidation }
   val cronStatus: StateFlow<GatewayCronStatus> = runtimeState(initial = GatewayCronStatus(enabled = false, jobs = 0, nextWakeAtMs = null)) { it.cronStatus }
   val cronJobs: StateFlow<List<GatewayCronJobSummary>> = runtimeState(initial = emptyList()) { it.cronJobs }
   val cronRefreshing: StateFlow<Boolean> = runtimeState(initial = false) { it.cronRefreshing }
@@ -1881,6 +1885,8 @@ class MainViewModel internal constructor(
   internal suspend fun fetchAgentChatSessions(agentId: String): List<ChatSessionEntry>? = ensureRuntime().chat.fetchSessionSelectionCandidates(agentId)
 
   internal suspend fun searchChatMessages(query: String): ChatMessageSearchResult? = ensureRuntime().searchChatMessages(query)
+
+  internal suspend fun fetchAgentExchangeHistory(agentId: String): AgentExchangeHistory = ensureRuntime().fetchAgentExchangeHistory(agentId)
 
   suspend fun startNewChatForAgent(agentId: String): Boolean = ensureRuntime().startNewChatForAgent(agentId)
 

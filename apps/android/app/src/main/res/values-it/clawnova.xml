@@ -56,4 +56,14 @@
   <string name="cn_search_messages_partial">I risultati potrebbero essere incompleti.</string>
   <string name="cn_search_messages_empty">Nessun messaggio corrispondente.</string>
   <string name="cn_search_messages_failed">Ricerca dei messaggi non riuscita. Prova un’altra ricerca.</string>
+  <string name="cn_agent_working">Al lavoro</string>
+  <string name="cn_agent_message_sent">Ha inviato un messaggio</string>
+  <string name="cn_agent_message_received">Ha ricevuto un messaggio</string>
+  <string name="cn_agent_exchanges">Scambi tra bot</string>
+  <string name="cn_agent_exchanges_read_only">Sola lettura</string>
+  <string name="cn_agent_exchanges_offline">Collegati al Gateway per vedere gli scambi tra bot.</string>
+  <string name="cn_agent_exchanges_error">Impossibile caricare gli scambi tra bot.</string>
+  <string name="cn_agent_exchanges_partial">Impossibile caricare alcune conversazioni recenti.</string>
+  <string name="cn_agent_exchanges_empty">Nessuno scambio recente tra bot.</string>
+  <string name="cn_agent_exchange_route">%1$s → %2$s</string>
 </resources>

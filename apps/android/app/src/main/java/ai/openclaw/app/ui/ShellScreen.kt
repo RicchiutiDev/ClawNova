@@ -10,6 +10,7 @@ import ai.openclaw.app.GatewaySummaryState
 import ai.openclaw.app.HomeDestination
 import ai.openclaw.app.MainViewModel
 import ai.openclaw.app.R
+import ai.openclaw.app.chat.LiveAgentExchange
 import ai.openclaw.app.chat.ChatSessionEntry
 import ai.openclaw.app.currentAppLanguage
 import ai.openclaw.app.firstGraphemeOrNull
@@ -162,6 +163,7 @@ fun ShellScreen(
     val nav = rememberSaveable(saver = ShellNavigation.Saver) { ShellNavigation() }
     var commandOpen by rememberSaveable { mutableStateOf(false) }
     var botProfileOpen by rememberSaveable { mutableStateOf(false) }
+    var exchangesAgentId by remember(appearanceGatewayId) { mutableStateOf<String?>(null) }
     var newAgentName by rememberSaveable { mutableStateOf("") }
     var conversationScreenWasActive by rememberSaveable { mutableStateOf(false) }
     val pendingTrust by viewModel.pendingGatewayTrust.collectAsState()
@@ -367,6 +369,7 @@ fun ShellScreen(
                     agentId = destination.agentId.orEmpty(),
                     onBack = { nav.selectTab(Tab.Overview) },
                     onOpenChat = openChat,
+                    onOpenAgentExchanges = { exchangesAgentId = destination.agentId },
                   )
                 }
 
@@ -501,6 +504,9 @@ fun ShellScreen(
           key(request) { GatewayAdditionDialog(viewModel, request) }
         }
 
+        exchangesAgentId?.let { agentId ->
+          AgentExchangeDialog(viewModel, agentId, gatewayAgents, gatewayConnectionDisplay.isConnected) { exchangesAgentId = null }
+        }
         pendingTrust?.let { prompt ->
           // Gateway certificate trust is modal across the shell so navigation
           // cannot hide a changed TLS identity prompt.
@@ -545,7 +551,7 @@ private fun OverviewScreen(
   ) {
     Column(modifier = Modifier.fillMaxSize().testTag("agents-home")) {
       HomeHeader(showSidebarButton, onOpenSidebar, onCreateAgent)
-      ManagedAgentList(viewModel, availableAgents, matchingAgents, defaultAgentId, onSelectAgent, onCreateAgent, Modifier.weight(1f)) {
+      ManagedAgentList(viewModel, availableAgents, matchingAgents, defaultAgentId, onSelectAgent, Modifier.weight(1f)) {
         if (query.isNotBlank()) {
           item(key = "message-search") {
             HomeMessageSearch(viewModel, query.trim(), connection.isConnected, onOpenMessage)
@@ -602,7 +608,9 @@ private fun HomeRoundAction(
 
 @Composable
 internal fun HomeBotHero(
-  agent: GatewayAgentSummary?,
+  agent: GatewayAgentSummary,
+  working: Boolean,
+  latest: LiveAgentExchange?,
   onClick: () -> Unit,
 ) {
   Column(
@@ -610,27 +618,28 @@ internal fun HomeBotHero(
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     Column(
-      modifier =
-        Modifier
-          .testTag("home-primary-bot")
-          .widthIn(max = 200.dp)
-          .clip(RoundedCornerShape(16.dp))
-          .clickable(onClick = onClick)
-          .padding(12.dp),
+      modifier = Modifier
+        .testTag("home-primary-bot")
+        .widthIn(max = 200.dp)
+        .clip(RoundedCornerShape(12.dp))
+        .clickable(role = Role.Button, onClick = onClick)
+        .padding(horizontal = 12.dp, vertical = 4.dp),
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      ClawAgentAvatar(source = agent?.let(::agentAvatarSource), size = 84.dp, identity = agent?.id) {
-        ClawAgentAvatarFallback(identity = agent?.id ?: "main", size = 84.dp)
+      ActivityAgentAvatar(agent, 84.dp, working, latest)
+      Box(
+        modifier = Modifier.heightIn(min = 48.dp).widthIn(min = 84.dp).padding(horizontal = 8.dp),
+        contentAlignment = Alignment.Center,
+      ) {
+        Text(
+          text = agent.name?.takeIf(String::isNotBlank) ?: agent.id,
+          style = ClawTheme.type.caption,
+          color = ClawTheme.colors.text,
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis,
+          textAlign = TextAlign.Center,
+        )
       }
-      Text(
-        text = agent?.name?.takeIf { it.isNotBlank() } ?: agent?.id ?: stringResource(R.string.clawnova_app_name),
-        style = ClawTheme.type.caption,
-        color = ClawTheme.colors.text,
-        maxLines = 2,
-        overflow = TextOverflow.Ellipsis,
-        textAlign = TextAlign.Center,
-      )
     }
   }
 }
@@ -638,6 +647,8 @@ internal fun HomeBotHero(
 @Composable
 internal fun HomeBotRow(
   agent: GatewayAgentSummary,
+  working: Boolean,
+  latest: LiveAgentExchange?,
   onClick: () -> Unit,
 ) {
   Surface(
@@ -647,7 +658,7 @@ internal fun HomeBotRow(
     shape = RoundedCornerShape(12.dp),
   ) {
     Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-      ClawAgentAvatar(source = agentAvatarSource(agent), size = 48.dp, identity = agent.id) { ClawAgentAvatarFallback(identity = agent.id, size = 48.dp) }
+      ActivityAgentAvatar(agent, 48.dp, working, latest)
       Text(agent.name?.takeIf(String::isNotBlank) ?: agent.id, style = ClawTheme.type.title, color = ClawTheme.colors.text, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
       Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(20.dp), tint = ClawTheme.colors.textSubtle)
     }

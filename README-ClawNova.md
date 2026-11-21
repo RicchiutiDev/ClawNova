@@ -4,6 +4,8 @@ ClawNova is a customized Android client built on [OpenClaw](https://github.com/o
 
 The Android interface has a redesigned agent home and chat flow, a bot profile, and locally customizable bot icons. Creating an agent requires a compatible Gateway and `operator.admin` access. The Standard variant uses the existing restricted implementations for SMS, call logs, and accessibility control and removes the notification listener service.
 
+On the agent home, a pulsing ring indicates that a bot is working, and an arrow briefly marks sent or received bot messages. Tap an agent to open its conversation list, then select **Bot exchanges** to read recent exchanges. The view shows live forwarded messages and loads up to 40 messages from each of the 12 most recently active sessions visible to your Gateway account.
+
 ## Requirements
 
 - Android 12 (API 31) or newer and an accessible OpenClaw Gateway.

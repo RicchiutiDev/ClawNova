@@ -70,6 +70,7 @@ internal fun AgentChatsScreen(
   agentId: String,
   onBack: () -> Unit,
   onOpenChat: () -> Unit,
+  onOpenAgentExchanges: () -> Unit,
 ) {
   val agents by viewModel.gatewayAgents.collectAsState()
   val gatewayId by viewModel.activeGatewayStableId.collectAsState()
@@ -123,6 +124,7 @@ internal fun AgentChatsScreen(
         Text(agent?.name?.takeIf(String::isNotBlank) ?: agentId, style = ClawTheme.type.title, color = ClawTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
         ClawPlainIconButton(icon = Icons.Default.Add, contentDescription = nativeString("New chat"), onClick = startNewChat, enabled = !starting && connection.isConnected)
       }
+      ClawSecondaryButton(text = stringResource(R.string.cn_agent_exchanges), onClick = onOpenAgentExchanges)
       ClawTextField(value = query, onValueChange = { query = it }, placeholder = nativeString("Search"), maxLines = 1)
       if (deleteFailed) Text(stringResource(R.string.cn_operation_error), color = ClawTheme.colors.danger, style = ClawTheme.type.caption)
       if (startFailed) Text(stringResource(R.string.clawnova_agent_chat_create_error), color = ClawTheme.colors.danger, style = ClawTheme.type.caption)

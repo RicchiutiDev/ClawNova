@@ -87,4 +87,3 @@ For the upstream Android project and other build variants, see the [Android deve
 ClawNova is an independent customization based on [OpenClaw](https://github.com/openclaw/openclaw), starting from upstream commit [`936f38793bab7199ea2cbe11fb5ef559062254a1`](https://github.com/openclaw/openclaw/commit/936f38793bab7199ea2cbe11fb5ef559062254a1). Thank you to the OpenClaw Foundation and contributors for the original project.
 
 The project retains the [MIT license](LICENSE) and [third-party notices](THIRD_PARTY_NOTICES.md).
-

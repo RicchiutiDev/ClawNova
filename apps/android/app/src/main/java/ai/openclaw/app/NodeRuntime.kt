@@ -1,5 +1,7 @@
 package ai.openclaw.app
 
+import ai.openclaw.app.chat.AgentActivity
+import ai.openclaw.app.chat.AgentExchangeHistory
 import ai.openclaw.app.chat.AndroidClientDatabases
 import ai.openclaw.app.chat.ChatAgentSessionSelectionOwner
 import ai.openclaw.app.chat.ChatCacheScope
@@ -20,6 +22,7 @@ import ai.openclaw.app.chat.SESSION_UNREAD_ACK_CAPABILITY
 import ai.openclaw.app.chat.SessionDiffSnapshot
 import ai.openclaw.app.chat.SessionForkResult
 import ai.openclaw.app.chat.SessionRewindResult
+import ai.openclaw.app.chat.loadAgentExchangeHistory
 import ai.openclaw.app.gateway.DeviceAuthEntry
 import ai.openclaw.app.gateway.DeviceAuthStore
 import ai.openclaw.app.gateway.DeviceIdentityStore
@@ -1211,6 +1214,7 @@ class NodeRuntime internal constructor(
 
   private val _gatewayAgents = MutableStateFlow<List<GatewayAgentSummary>>(emptyList())
   val gatewayAgents: StateFlow<List<GatewayAgentSummary>> = _gatewayAgents.asStateFlow()
+  internal val agentActivity = AgentActivity()
 
   // The focused Gateway owns this choice for the runtime's lifetime; replacing a
   // socket must not rebind Chat or Talk to the default agent.
@@ -1742,6 +1746,7 @@ class NodeRuntime internal constructor(
     // physical lease still prevents requests and response publication.
     appearancePreferenceRefreshGuard.invalidate()
     _gatewayAgents.value = emptyList()
+    agentActivity.clear()
     resetLegacyMetadataRefresh()
     modelCatalogRefreshGuard.invalidate()
     modelCatalogRefresh = null
@@ -1810,10 +1815,30 @@ class NodeRuntime internal constructor(
   }
 
   private suspend fun subscribeOperatorSessionEvents() {
+    val gatewayScope = captureGatewayDataScope() ?: return
+    val lease = operatorSession.captureRequestLease(gatewayScope.stableId) ?: return
+    var snapshot: AgentActivity.Snapshot? = null
+    if (!lease.commitIfCurrent { snapshot = agentActivity.beginSnapshot() }) return
+    val pending = checkNotNull(snapshot)
+    var rows: JsonArray? = null
     try {
-      operatorSession.request(GatewayMethod.SessionsSubscribe.rawValue, null)
-    } catch (err: Throwable) {
+      val response =
+        try {
+          lease.request(GatewayMethod.SessionsSubscribe.rawValue, """{"limit":200,"activeOnly":true,"includeGlobal":true}""")
+        } catch (error: CancellationException) {
+          throw error
+        } catch (_: Exception) {
+          // Older Gateways can still stream events without the active roster filter.
+          lease.request(GatewayMethod.SessionsSubscribe.rawValue, null)
+        }
+      val list = parseJsonParamsObject(response)?.get("list").asObjectOrNull()
+      rows = list?.get("sessions") as? JsonArray
+    } catch (error: CancellationException) {
+      throw error
+    } catch (err: Exception) {
       Log.d("OpenClawRuntime", "sessions.subscribe failed: ${err.message ?: err::class.java.simpleName}")
+    } finally {
+      lease.commitIfCurrent { agentActivity.finishSnapshot(pending, rows) }
     }
     syncSessionObserverVisibility()
   }
@@ -2951,6 +2976,7 @@ class NodeRuntime internal constructor(
     _gatewaySourcePreviewConfig.value = AndroidScreenshotFixture.sourcePreviewConfig
     updateGatewayDefaultAgentId("main")
     _gatewayAgents.value = AndroidScreenshotFixture.agents
+    agentActivity.finishSnapshot(agentActivity.beginSnapshot(), null)
     _modelCatalog.value = AndroidScreenshotFixture.models
     _providerModelCatalog.value = AndroidScreenshotFixture.models
     _modelAuthProviders.value = AndroidScreenshotFixture.providers
@@ -5485,6 +5511,9 @@ class NodeRuntime internal constructor(
     event: String,
     payloadJson: String?,
   ) {
+    if (event == "sessions.changed" || event == "session.message") {
+      parseJsonParamsObject(payloadJson)?.let { agentActivity.observe(event, it, SystemClock.elapsedRealtime()) }
+    }
     if (event == "update.available") {
       _gatewayUpdateAvailable.value = parseGatewayUpdateAvailable(payloadJson)
     }
@@ -5815,6 +5844,21 @@ class NodeRuntime internal constructor(
         requestGatewayData(gatewayScope, "sessions.search", params.toString(), timeoutMs = 90_000)
       }
     return parseChatMessageSearchResult(checkNotNull(json.parseToJsonElement(response).asObjectOrNull()))
+  }
+
+  internal suspend fun fetchAgentExchangeHistory(agentId: String): AgentExchangeHistory {
+    if (mode == NodeRuntimeMode.ScreenshotFixture) {
+      return loadAgentExchangeHistory(agentId) { method, params ->
+        parseJsonParamsObject(screenshotRequester(method, params.toString()))
+      }
+    }
+    val gatewayScope = checkNotNull(captureGatewayDataScope()) { "Gateway disconnected" }
+    val lease = checkNotNull(operatorSession.captureRequestLease(gatewayScope.stableId)) { "Gateway disconnected" }
+    val history = loadAgentExchangeHistory(agentId) { method, params ->
+      parseJsonParamsObject(lease.request(method, params.toString()))
+    }
+    if (!lease.isCurrent() || !isGatewayDataScopeCurrent(gatewayScope)) throw CancellationException("Gateway changed")
+    return history
   }
 
   private suspend fun requestGatewayApprovalData(

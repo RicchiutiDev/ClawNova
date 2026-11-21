@@ -37,11 +37,20 @@ internal fun ManagedAgentList(
   matching: List<GatewayAgentSummary>,
   defaultId: String?,
   onSelect: (String) -> Unit,
-  onCreate: () -> Unit,
   modifier: Modifier = Modifier,
   afterAgents: LazyListScope.() -> Unit = {},
 ) {
   val gateway by viewModel.activeGatewayStableId.collectAsState()
+  val workingAgents by viewModel.workingAgents.collectAsState()
+  val exchanges by viewModel.liveAgentExchanges.collectAsState()
+  val latestByAgent = remember(exchanges) {
+    buildMap {
+      exchanges.forEach {
+        putIfAbsent(it.exchange.senderId, it)
+        putIfAbsent(it.exchange.recipient.agentId, it)
+      }
+    }
+  }
   val context = LocalContext.current
   val prefs = remember { context.getSharedPreferences("clawnova_agent_arrangement", android.content.Context.MODE_PRIVATE) }
   val key = gateway ?: ""
@@ -76,7 +85,15 @@ internal fun ManagedAgentList(
     error?.let { Text(it, color = ClawTheme.colors.danger, modifier = Modifier.padding(8.dp)) }
     LazyColumn(modifier = Modifier.fillMaxSize()) {
       if (visiblePrimary != null) item {
-        Box { HomeBotHero(visiblePrimary) { onSelect(visiblePrimary.id) }; IconButton(onClick = { menuAgent = visiblePrimary }, modifier = Modifier.align(androidx.compose.ui.Alignment.TopEnd)) { Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.cn_bot_options), tint = ClawTheme.colors.text) } }
+        Box {
+          val id = visiblePrimary.id.lowercase()
+          HomeBotHero(visiblePrimary, id in workingAgents, latestByAgent[id]) {
+            onSelect(visiblePrimary.id)
+          }
+          IconButton(onClick = { menuAgent = visiblePrimary }, modifier = Modifier.align(androidx.compose.ui.Alignment.TopEnd)) {
+            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.cn_bot_options), tint = ClawTheme.colors.text)
+          }
+        }
       }
       if (agents.isEmpty()) item { Text(stringResource(R.string.clawnova_no_agents), modifier = Modifier.padding(16.dp), color = ClawTheme.colors.text) }
       val groups = arrangement.sections.map { it to others.filter { agent -> arrangement.assignments[agent.id] == it } } + (unassigned to others.filter { arrangement.assignments[it.id] !in arrangement.sections })
@@ -90,7 +107,10 @@ internal fun ManagedAgentList(
           }
           if (name !in collapsed) items(members, key = { "agent:${it.id}" }) { agent ->
             Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-              Box(Modifier.weight(1f)) { HomeBotRow(agent) { onSelect(agent.id) } }
+              Box(Modifier.weight(1f)) {
+                val id = agent.id.lowercase()
+                HomeBotRow(agent, id in workingAgents, latestByAgent[id]) { onSelect(agent.id) }
+              }
               IconButton(onClick = { menuAgent = agent }) { Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.cn_bot_options), tint = ClawTheme.colors.text) }
             }
           }

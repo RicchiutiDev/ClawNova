@@ -57,4 +57,14 @@
   <string name="cn_search_messages_partial">Results may be incomplete.</string>
   <string name="cn_search_messages_empty">No matching messages.</string>
   <string name="cn_search_messages_failed">Could not search messages. Try another query.</string>
+  <string name="cn_agent_working">Working</string>
+  <string name="cn_agent_message_sent">Sent a message</string>
+  <string name="cn_agent_message_received">Received a message</string>
+  <string name="cn_agent_exchanges">Bot exchanges</string>
+  <string name="cn_agent_exchanges_read_only">Read only</string>
+  <string name="cn_agent_exchanges_offline">Connect to your Gateway to see bot exchanges.</string>
+  <string name="cn_agent_exchanges_error">Could not load bot exchanges.</string>
+  <string name="cn_agent_exchanges_partial">Some recent conversations could not be loaded.</string>
+  <string name="cn_agent_exchanges_empty">No recent bot exchanges.</string>
+  <string name="cn_agent_exchange_route">%1$s → %2$s</string>
 </resources>

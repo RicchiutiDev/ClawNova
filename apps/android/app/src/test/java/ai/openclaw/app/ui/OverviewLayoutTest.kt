@@ -25,11 +25,13 @@ import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
@@ -47,6 +49,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTouchInput
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelStore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -136,6 +139,50 @@ class OverviewLayoutTest {
     composeRule.onNodeWithContentDescription("Show Sidebar").assertIsDisplayed().performClick()
     composeRule.onNodeWithContentDescription("Settings").performClick()
     composeRule.onNodeWithContentDescription("Search settings").assertIsDisplayed()
+  }
+
+  @Test
+  fun tappingWorkingAgentAvatarOpensChatsWithAccessToBotExchanges() {
+    composeRule.setContent { ShellScreen(model) }
+    composeRule.waitUntil { model.gatewayAgents.value.isNotEmpty() }
+    fun publish(event: String, payload: String) {
+      composeRule.runOnIdle {
+        ReflectionHelpers.callInstanceMethod<Unit>(
+          runtime,
+          "handleGatewayEvent",
+          ReflectionHelpers.ClassParameter.from(String::class.java, event),
+          ReflectionHelpers.ClassParameter.from(String::class.java, payload),
+        )
+      }
+    }
+
+    publish("sessions.changed", """{"sessionKey":"agent:main:fixture","hasActiveRun":true}""")
+    publish(
+      "session.message",
+      """{"sessionKey":"agent:main:fixture","messageId":"bot-exchange-test","message":{
+        "role":"assistant","senderSession":{"agentId":"reviewer"},"content":"The draft is ready for review.","timestamp":1762355520000
+      }}""",
+    )
+    val avatar = composeRule.onNodeWithTag("agent-avatar-main", useUnmergedTree = true)
+    avatar.assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Working, Received a message"))
+    capture("home-agent-activity")
+    avatar.performTouchInput { click() }
+    composeRule.onNodeWithTag("agent-chats").assertIsDisplayed()
+    composeRule.onNodeWithText(AndroidScreenshotFixture.primarySessionTitle).assertIsDisplayed()
+    composeRule.onNodeWithTag("agent-exchange-dialog").assertDoesNotExist()
+    composeRule.onNodeWithText("Bot exchanges").performClick()
+    composeRule.onNodeWithTag("agent-exchange-dialog").assertIsDisplayed()
+    composeRule.onNodeWithText("reviewer → Molty").assertIsDisplayed()
+    composeRule.onNodeWithText("The draft is ready for review.").assertIsDisplayed()
+    capture("agent-exchanges", "agent-exchange-dialog")
+    composeRule.onNode(hasContentDescription("Back") and hasAnyAncestor(hasTestTag("agent-exchange-dialog"))).performClick()
+    composeRule.onNodeWithTag("agent-chats").assertIsDisplayed()
+    composeRule.onNodeWithContentDescription("Back").performClick()
+
+    publish("sessions.changed", """{"sessionKey":"agent:main:fixture","hasActiveRun":false}""")
+    avatar.assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription).or(
+      SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Received a message"),
+    ))
   }
 
   @Test
@@ -408,8 +455,9 @@ class OverviewLayoutTest {
     assertTrue("Overview status text must retain at least 4.5:1 rendered contrast: " + failures.joinToString(), failures.isEmpty())
   }
 
-  private fun capture(name: String) {
-    val image = composeRule.onRoot().captureToImage().asAndroidBitmap()
+  private fun capture(name: String, testTag: String? = null) {
+    val node = if (testTag == null) composeRule.onRoot() else composeRule.onNodeWithTag(testTag)
+    val image = node.captureToImage().asAndroidBitmap()
     assertTrue("Capture must include the full phone root", image.width >= 360 && image.height >= 700)
     File(evidence, "$name.png").outputStream().use { stream ->
       assertTrue(image.compress(Bitmap.CompressFormat.PNG, 100, stream))
